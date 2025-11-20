@@ -1,13 +1,13 @@
 name: BP_CI
 
 env:
-  AZURE_WEBAPP_NAME: bp-calculator-prashidi    
-  AZURE_WEBAPP_PACKAGE_PATH: '.'      
-  DOTNET_VERSION: '9'                
+  AZURE_WEBAPP_NAME: bp-calculator-prashidi
+  AZURE_WEBAPP_PACKAGE_PATH: "."
+  DOTNET_VERSION: "9"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -33,8 +33,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: Build with dotnet
+      - name: Build for Release
         run: dotnet build --configuration Release
+
+      - name: Run unit tests
+        run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage"
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
@@ -51,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: 'Development'
+      name: "Development"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
