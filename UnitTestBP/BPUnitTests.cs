@@ -22,7 +22,7 @@ public sealed class BPUnitTests
     [DataRow(110, 60, BPCategory.Ideal)]      
     // Low
     [DataRow(85, 55, BPCategory.Low)]
-    [DataRow(100, 45, BPCategory.Low)]
+    [DataRow(70, 40, BPCategory.Low)]
     // Pre-High
     [DataRow(125, 75, BPCategory.PreHigh)]
     [DataRow(118, 85, BPCategory.PreHigh)]

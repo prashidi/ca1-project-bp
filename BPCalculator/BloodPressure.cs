@@ -47,8 +47,8 @@ namespace BPCalculator
                     return BPCategory.PreHigh;
                 }
 
-                // Ideal: systolic 90–119 AND diastolic 60–79
-                if ((syst >= 90 && syst <= 119) && (diast >= 60 && diast <= 79))
+                // Ideal: systolic 90–119 AND diastolic 40–79
+                if ((syst >= 90 && syst <= 119) && (diast >= 40 && diast <= 79))
                 {
                     return BPCategory.Ideal;
                 }
