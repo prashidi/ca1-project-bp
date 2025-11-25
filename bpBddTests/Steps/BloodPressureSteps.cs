@@ -20,22 +20,93 @@ namespace bpBddTests.Steps
                 _ => Given_a_systolic_pressure_of(150),
                 _ => And_a_diastolic_pressure_of(70),
                 _ => When_I_calculate_the_blood_pressure(),
-                _ => Then_the_result_should_be("High Blood Pressure")
+                _ => Then_the_result_should_be("High")
             );
         }
 
         [Scenario]
         [Label("BP-02")]
+        public void High_blood_pressure_by_diastolic()
+        {
+            Runner.RunScenario(
+                _ => Given_a_systolic_pressure_of(120),
+                _ => And_a_diastolic_pressure_of(95),
+                _ => When_I_calculate_the_blood_pressure(),
+                _ => Then_the_result_should_be("High")
+            );
+        }
+
+        [Scenario]
+        [Label("BP-03")]
+        public void Pre_high_by_systolic()
+        {
+            Runner.RunScenario(
+                _ => Given_a_systolic_pressure_of(130),
+                _ => And_a_diastolic_pressure_of(75),
+                _ => When_I_calculate_the_blood_pressure(),
+                _ => Then_the_result_should_be("PreHigh")
+            );
+        }
+
+        [Scenario]
+        [Label("BP-04")]
+        public void Pre_high_by_diastolic()
+        {
+            Runner.RunScenario(
+                _ => Given_a_systolic_pressure_of(118),
+                _ => And_a_diastolic_pressure_of(85),
+                _ => When_I_calculate_the_blood_pressure(),
+                _ => Then_the_result_should_be("PreHigh")
+            );
+        }
+
+        [Scenario]
+        [Label("BP-05")]
         public void Ideal_blood_pressure()
         {
             Runner.RunScenario(
                 _ => Given_a_systolic_pressure_of(110),
                 _ => And_a_diastolic_pressure_of(70),
                 _ => When_I_calculate_the_blood_pressure(),
-                _ => Then_the_result_should_be("Ideal Blood Pressure")
+                _ => Then_the_result_should_be("Ideal")
 
             );
 
+        }
+
+        [Scenario]
+        [Label("BP-06")]
+        public void Ideal_at_lower_boundary()
+        {
+            Runner.RunScenario(
+                _ => Given_a_systolic_pressure_of(100),
+                _ => And_a_diastolic_pressure_of(40),
+                _ => When_I_calculate_the_blood_pressure(),
+                _ => Then_the_result_should_be("Ideal")
+            );
+        }
+        [Scenario]
+        [Label("BP-07")]
+        public void Low_by_systolic()
+        {
+            Runner.RunScenario(
+                _ => Given_a_systolic_pressure_of(85),
+                _ => And_a_diastolic_pressure_of(55),
+                _ => When_I_calculate_the_blood_pressure(),
+                _ => Then_the_result_should_be("Low")
+            );
+        }
+
+        [Scenario]
+        [Label("BP-08")]
+        public void Low_by_diastolic()
+        {
+            Runner.RunScenario(
+                _ => Given_a_systolic_pressure_of(100),
+                _ => And_a_diastolic_pressure_of(35),
+                _ => When_I_calculate_the_blood_pressure(),
+                _ => Then_the_result_should_be("Low")
+            );
         }
         private void Given_a_systolic_pressure_of(int value)
         {
@@ -51,7 +122,7 @@ namespace bpBddTests.Steps
 
         private void When_I_calculate_the_blood_pressure()
         {
-            result = FormatCategory(bp.Category);
+            result = bp.Category.ToString();
         }
 
         private void Then_the_result_should_be(string expected)
@@ -59,16 +130,5 @@ namespace bpBddTests.Steps
             Assert.AreEqual(expected, result);
         }
 
-        private string FormatCategory(BPCategory category)
-        {
-            return category switch {
-                BPCategory.Ideal => "Ideal Blood Pressure",
-                BPCategory.High => "High Blood Pressure",
-                BPCategory.PreHigh => "Pre-High Blood Pressure",
-                BPCategory.Low => "Low Blood Pressure",
-                _ => ""
-
-            };
-        }
     }
 }

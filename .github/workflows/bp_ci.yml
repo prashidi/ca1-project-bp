@@ -39,6 +39,9 @@ jobs:
       - name: Run unit tests
         run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage"
 
+      - name: Run BDD Tests
+        run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage"
+
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
