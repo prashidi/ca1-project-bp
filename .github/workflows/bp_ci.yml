@@ -42,10 +42,8 @@ jobs:
       - name: Run BDD Tests
         run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage"
 
-      - name: Install k6
-        run: |
-          curl -s https://packagecloud.io/install/repositories/grafana/stable/script.deb.sh | sudo bash
-          sudo apt-get install -y k6
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
 
       - name: Run k6 Performance Test
         run: k6 run k6tests/perf1.js
