@@ -44,9 +44,7 @@ jobs:
 
       - name: Install k6
         run: |
-          curl -L <https://github.com/grafana/k6/releases/latest/download/k6-v0.51.0-linux-amd64.tar.gz> -o k6.tar.gz
-          tar -xzf k6.tar.gz
-          sudo mv k6-v*/k6 /usr/local/bin/k6
+          curl -s https://raw.githubusercontent.com/grafana/k6/master/scripts/install.sh | sudo bash
 
       - name: Run k6 Performance Test
         run: k6 run k6tests/perf1.js
