@@ -39,7 +39,7 @@ export const options = {
 // Export a default function - this defines the entry point for your VUs,
 // similar to the main() function in many other languages.
 export default function () {
-  const url =
+  const res =
     "https://bp-calculator-prashidi-dggsdtf3fhd6b2hd.northeurope-01.azurewebsites.net";
 
   check(res, {
