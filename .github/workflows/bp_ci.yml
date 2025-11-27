@@ -37,10 +37,10 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: Run unit tests
-        run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage"
+        run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage" --verbosity normal -1:trx
 
       - name: Run BDD Tests
-        run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage"
+        run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage" --verbosity normal -1:trx
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
