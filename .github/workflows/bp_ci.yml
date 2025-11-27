@@ -37,10 +37,10 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: Run unit tests
-        run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage" --verbosity normal -1:trx
+        run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage"
 
       - name: Run BDD Tests
-        run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage" --verbosity normal -1:trx
+        run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage"
 
       - name: Install k6
         run: sudo apt-get update && sudo apt-get install -y k6
