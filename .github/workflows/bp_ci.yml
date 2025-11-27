@@ -42,7 +42,7 @@ jobs:
       - name: Run BDD Tests
         run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage"
 
-      - name: Setup k6
+      - name: Run k6 Performance Test
         uses: grafana/run-k6-action@v1
         env:
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
