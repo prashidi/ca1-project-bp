@@ -43,10 +43,12 @@ jobs:
         run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage"
 
       - name: Setup k6
-        uses: grafana/setup-k6-action@v1
-
-      - name: Run k6 Performance Test
-        run: k6 run k6tests/perf1.js
+        uses: grafana/run-k6-action@v1
+        env:
+          K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
+          K6_CLOUD_PROJECT_ID: ${{ secrets.K6_CLOUD_PROJECT_ID }}
+        with:
+          path: run k6tests/perf1.js
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
