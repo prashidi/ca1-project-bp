@@ -42,6 +42,12 @@ jobs:
       - name: Run BDD Tests
         run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage" --verbosity normal -1:trx
 
+      - name: Install k6
+        run: sudo apt-get update && sudo apt-get install -y k6
+
+      - name: Run k6 Performance Test
+        run: k6 run k6tests/perf1.js
+
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
