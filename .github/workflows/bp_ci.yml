@@ -44,7 +44,8 @@ jobs:
 
       - name: Install k6
         run: |
-          curl -s https://raw.githubusercontent.com/grafana/k6/master/scripts/install.sh | sudo bash
+          curl -s https://packagecloud.io/install/repositories/grafana/stable/script.deb.sh | sudo bash
+          sudo apt-get install -y k6
 
       - name: Run k6 Performance Test
         run: k6 run k6tests/perf1.js
