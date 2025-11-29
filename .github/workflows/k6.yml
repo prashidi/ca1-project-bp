@@ -11,16 +11,16 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Pull Docker image for k6
-        env:
-          K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
-          K6_CLOUD_PROJECT_ID: ${{ secrets.K6_CLOUD_PROJECT_ID }}
         run: docker pull grafana/k6
 
-      - name: Run k6 load test, capture report
+      - name: Run k6 load test, capture report and send to Grafana Cloud
         env:
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
           K6_CLOUD_PROJECT_ID: ${{ secrets.K6_CLOUD_PROJECT_ID }}
-        run: docker run -i grafana/k6 run - <k6tests/perf2.js > k6report.txt
+        run: docker run -i \\
+          -e K6_CLOUD_TOKEN=${K6_CLOUD_TOKEN} \\
+          -e K6_CLOUD_PROJECT_ID=${K6_CLOUD_PROJECT_ID} \\
+          grafana/k6 run - < k6tests/perf2.js > k6report.txt
 
       - uses: actions/upload-artifact@v4
         with:
