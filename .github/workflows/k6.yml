@@ -17,7 +17,7 @@ jobs:
         env:
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
           K6_CLOUD_PROJECT_ID: ${{ secrets.K6_CLOUD_PROJECT_ID }}
-        run: docker run -i -e K6_CLOUD_TOKEN=${K6_CLOUD_TOKEN} -e K6_CLOUD_PROJECT_ID=${K6_CLOUD_PROJECT_ID} grafana/k6 run - < k6tests/perf2.js > k6report.txt
+        run: docker run -i -e K6_CLOUD_TOKEN=${K6_CLOUD_TOKEN} -e K6_CLOUD_PROJECT_ID=${K6_CLOUD_PROJECT_ID} grafana/k6 cloud run - < k6tests/perf2.js > k6report.txt
 
       - uses: actions/upload-artifact@v4
         with:
