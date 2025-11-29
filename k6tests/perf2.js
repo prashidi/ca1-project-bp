@@ -21,10 +21,9 @@ export let options = {
 
   cloud: {
     name: "BP Load Test",
-    // distribution: {
-    //   distributionLabel1: { loadZone: "amazon:us:ashburn", percent: 50 },
-    //   distributionLabel2: { loadZone: "amazon:ie:dublin", percent: 50 },
-    // },
+    distribution: {
+      distributionLabel2: { loadZone: "amazon:ie:dublin", percent: 100 },
+    },
   },
 };
 
