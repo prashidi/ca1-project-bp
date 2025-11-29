@@ -1,7 +1,7 @@
 # OWASP Dependency checker
 # based on docker image built nightly
 
-name: OWASP Dependency Checker       
+name: BP - OWASP Dependency Checker       
   
 on:
   workflow_dispatch:                  # manually triggered
