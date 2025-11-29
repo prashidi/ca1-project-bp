@@ -1,4 +1,4 @@
-name: k6 BP
+name: BP - k6 Tests
 
 on:
   workflow_dispatch: # manually triggered
