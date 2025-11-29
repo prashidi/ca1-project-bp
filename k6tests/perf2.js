@@ -19,12 +19,13 @@ export let options = {
   // Save response bodies (only GET forces text anyway)
   discardResponseBodies: false,
 
-//   cloud: {
-//     distribution: {
-//       distributionLabel1: { loadZone: "amazon:us:ashburn", percent: 50 },
-//       distributionLabel2: { loadZone: "amazon:ie:dublin", percent: 50 },
-//     },
-//   },
+  cloud: {
+    name: "BP Load Test",
+    // distribution: {
+    //   distributionLabel1: { loadZone: "amazon:us:ashburn", percent: 50 },
+    //   distributionLabel2: { loadZone: "amazon:ie:dublin", percent: 50 },
+    // },
+  },
 };
 
 /**
