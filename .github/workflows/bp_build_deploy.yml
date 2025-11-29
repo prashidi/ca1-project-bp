@@ -1,4 +1,4 @@
-name: BP_CI
+name: BP BUILD AND DEPLOY
 
 env:
   AZURE_WEBAPP_NAME: bp-calculator-prashidi
@@ -6,9 +6,9 @@ env:
   DOTNET_VERSION: "9"
 
 on:
-  push:
-    branches: ["main"]
-  workflow_dispatch:
+  # push:
+  #   branches: ["main"]
+  workflow_dispatch: # manually triggered
 
 permissions:
   contents: read
@@ -42,16 +42,16 @@ jobs:
       - name: Run BDD Tests
         run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage"
 
-      - name: Setup k6
-        uses: grafana/setup-k6-action@v1
+      # - name: Setup k6
+      #   uses: grafana/setup-k6-action@v1
 
-      - name: Run k6 Performance Test
-        uses: grafana/run-k6-action@v1
-        env:
-          K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
-          K6_CLOUD_PROJECT_ID: ${{ secrets.K6_CLOUD_PROJECT_ID }}
-        with:
-          path: k6tests/perf1.js
+      # - name: Run k6 Performance Test
+      #   uses: grafana/run-k6-action@v1
+      #   env:
+      #     K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
+      #     K6_CLOUD_PROJECT_ID: ${{ secrets.K6_CLOUD_PROJECT_ID }}
+      #   with:
+      #     path: k6tests/perf1.js
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
