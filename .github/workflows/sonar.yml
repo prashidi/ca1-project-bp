@@ -12,7 +12,7 @@ jobs:
         with:
           fetch-depth: 0  
       - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@v5.0.0
+        uses: sonarsource/sonarcloud-github-action@0f50737321f53f5e3d22c01aff11bfd31b74c3b9
         with:
           projectBaseDir: .
           args: >
