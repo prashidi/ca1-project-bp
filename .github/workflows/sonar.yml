@@ -1,0 +1,22 @@
+# Sonar cloud scan
+
+name: BP - SonarCloud
+on:
+  workflow_dispatch:                             
+
+jobs:
+  scan_code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization="Patrick Rashidi"
+            -Dsonar.projectKey=ca1-project-bp
+        env:
+          SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
