@@ -16,7 +16,7 @@ jobs:
         with:
           projectBaseDir: .
           args: >
-            -Dsonar.organization="Patrick Rashidi"
+            -Dsonar.organization=prashidi
             -Dsonar.projectKey=ca1-project-bp
         env:
           SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
