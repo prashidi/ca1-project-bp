@@ -17,7 +17,7 @@ jobs:
           projectBaseDir: .
           args: >
             -Dsonar.organization=prashidi
-            -Dsonar.projectKey=ca1-project-bp
+            -Dsonar.projectKey=prashidi_ca1-project-bp
             -Dsonar.branch.name=main
             -Dsonar.branch.target=main
         env:
