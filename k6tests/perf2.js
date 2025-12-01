@@ -22,7 +22,7 @@ export let options = {
   cloud: {
     name: "BP Load Test",
     distribution: {
-      distributionLabel1: { loadZone: "amazon:ie:dublin", percent: 100 },
+      distributionLabel2: { loadZone: "amazon:ie:dublin", percent: 100 },
     },
   },
 };
@@ -35,7 +35,8 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-const BASE_URL = __ENV.K6_TARGET_URL;
+const BASE_URL =
+  "https://bp-calculator-prashidi-staging-euaec9evcje4fhcd.northeurope-01.azurewebsites.net/";
 
 // Default VU function — entry point
 export default function () {

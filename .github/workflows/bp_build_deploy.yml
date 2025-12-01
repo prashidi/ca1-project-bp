@@ -6,8 +6,8 @@ env:
   DOTNET_VERSION: "9"
 
 on:
-  push:
-    branches: ["main", "staging"]
+  # push:
+  #   branches: ["main", "staging"]
   workflow_dispatch: # manually triggered
 
 permissions:
