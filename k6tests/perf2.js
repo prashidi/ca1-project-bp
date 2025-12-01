@@ -35,8 +35,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-const BASE_URL =
-  "https://bp-calculator-prashidi-dggsdtf3fhd6b2hd.northeurope-01.azurewebsites.net";
+const BASE_URL = __ENV.K6_TARGET_URL;
 
 // Default VU function — entry point
 export default function () {
