@@ -1,6 +1,9 @@
 import { check, sleep } from "k6";
 import http from "k6/http";
 
+const BASE_URL =
+  "https://bp-calculator-prashidi-staging-euaec9evcje4fhcd.northeurope-01.azurewebsites.net";
+
 // Export an options object to configure how k6 will behave during test execution.
 //
 export let options = {
@@ -34,9 +37,6 @@ export let options = {
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
-
-const BASE_URL =
-  "https://bp-calculator-prashidi-staging-euaec9evcje4fhcd.northeurope-01.azurewebsites.net/";
 
 // Default VU function — entry point
 export default function () {
