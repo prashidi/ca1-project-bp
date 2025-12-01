@@ -5,8 +5,9 @@ name: BP - OWASP Dependency Checker
   
 on:
   push:
-    branches: ["staging"]
-  workflow_dispatch:                  # manually triggered
+    branches: 
+      - staging
+
 
 jobs:
   dependency_check:

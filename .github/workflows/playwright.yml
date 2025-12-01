@@ -5,8 +5,8 @@ env:
 
 on:
   push:
-    branches: ["staging"]
-  workflow_dispatch:
+    branches: 
+      - staging
 
 jobs:
   test:

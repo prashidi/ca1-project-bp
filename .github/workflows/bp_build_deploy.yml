@@ -7,8 +7,9 @@ env:
 
 on:
   push:
-    branches: ["main", "staging"]
-  workflow_dispatch: # manually triggered
+    branches: 
+      - main 
+      - staging
 
 permissions:
   contents: read
