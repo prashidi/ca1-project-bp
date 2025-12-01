@@ -4,8 +4,8 @@ name: BP - SonarCloud
 
 on:
   push:
-    branches: ["staging"]
-  workflow_dispatch:                             
+    branches:
+      - staging                           
 
 jobs:
   scan_code:
