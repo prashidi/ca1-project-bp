@@ -1,7 +1,10 @@
 # Sonar cloud scan
 
 name: BP - SonarCloud
+
 on:
+  push:
+    branches: ["staging"]
   workflow_dispatch:                             
 
 jobs:
