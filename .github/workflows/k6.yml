@@ -1,6 +1,6 @@
 name: BP - k6 Tests
 env:
-  K6_TARGET_URL: https://bp-calculator-prashidi-staging-euaec9evcje4fhcd.northeurope-01.azurewebsites.net
+  K6_TARGET_URL: "https://bp-calculator-prashidi-staging-euaec9evcje4fhcd.northeurope-01.azurewebsites.net"
 
 on:
   push:
