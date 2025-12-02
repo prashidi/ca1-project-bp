@@ -24,7 +24,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
     name: sku
     tier: 'Basic'
     size: sku
-    capacity: 1
+    capacity: 5
   }
 }
 
