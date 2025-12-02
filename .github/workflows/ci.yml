@@ -62,7 +62,7 @@ jobs:
           args: >
             -Dsonar.organization=prashidi
             -Dsonar.projectKey=prashidi_ca1-project-bp
-            -Dsonar.cs.opencover.reportsPaths=TestResults/*coverage.xml
+            -Dsonar.cs.opencover.reportsPaths=TestResults/*-coverage.xml
             -Dsonar.cs.vstest.reportsPaths=TestResults/*.trx
 
         env:
