@@ -47,7 +47,7 @@ jobs:
             -relative_paths:true
 
       - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@v2
+        uses: sonarsource/sonarcloud-github-action@master
         env:
           SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
         with:
