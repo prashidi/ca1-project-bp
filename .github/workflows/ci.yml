@@ -34,14 +34,18 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
+      
       - name: Build for Release
         run: dotnet build --configuration Release
 
-      - name: Run unit tests
-        run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage" --verbosity normal -l:trx
-
-      - name: Run BDD Tests
-        run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage" --verbosity normal -l:trx
+      - name: Run Unit and BDD Tests with Code Coverage
+        run: dotnet test --collect:"XPlat Code Coverage"
+      
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+      
+      - name: Convert coverage to OpenCover
+        run: reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:OpenCover
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
