@@ -11,8 +11,7 @@ param environment string = 'production'
 param appServicePlanName string = '${appServiceName}-plan'
 
 @description('App Service Plan SKU')
-param sku string = 'B1'
-
+param sku string = 'S1'
 
 // ------------------------------------------------------------
 // APP SERVICE PLAN
@@ -22,12 +21,11 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   location: location
   sku: {
     name: sku
-    tier: 'Basic'
+    tier: 'Standard'
     size: sku
-    capacity: 5
+    capacity: 3
   }
 }
-
 
 // ------------------------------------------------------------
 // APPLICATION INSIGHTS
@@ -40,7 +38,6 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
     Application_Type: 'web'
   }
 }
-
 
 // ------------------------------------------------------------
 // APP SERVICE — PRODUCTION SLOT
@@ -73,7 +70,6 @@ resource app 'Microsoft.Web/sites@2022-03-01' = {
     }
   }
 }
-
 
 // ------------------------------------------------------------
 // STAGING SLOT (ONLY WHEN ENV == staging)
