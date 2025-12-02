@@ -50,8 +50,8 @@ jobs:
       - name: Upload TestResults as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: TestResults
-          path: TestResults
+          name: test-resuls
+          path: ${{github.workspace}}/TestResults
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
