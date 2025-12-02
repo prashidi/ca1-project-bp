@@ -8,10 +8,7 @@ env:
   URI: https://bp-calculator-prashidi-staging-euaec9evcje4fhcd.northeurope-01.azurewebsites.net          
   
 on:
-  push:
-    branches: 
-      - staging
-
+  workflow_call
 
 jobs:
 

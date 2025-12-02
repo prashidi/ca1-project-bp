@@ -3,10 +3,8 @@ env:
   K6_TARGET_URL: "https://bp-calculator-prashidi-staging-euaec9evcje4fhcd.northeurope-01.azurewebsites.net"
 
 on:
-  push:
-    branches: 
-      - staging
-
+  workflow_call
+  
 jobs:
   k6_load_test:
     runs-on: ubuntu-latest
