@@ -37,35 +37,36 @@ jobs:
 
       - name: Build for Release
         run: dotnet build --configuration Release
-      
+
       - name: Create TestResults folder
         run: mkdir -p ${{github.workspace}}/TestResults
 
       - name: Run Unit Tests with Coverage
         run: |
-          dotnet test UnitTestBP/UnitTestBP.csproj --logger "trx;LogFileName=${{github.workspace}}/TestResults/unit-tests.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=${{github.workspace}}/TestResults/unit-coverage.xml
-      
+          dotnet test UnitTestBP/UnitTestBP.csproj --logger "trx;LogFileName=unit-tests.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../TestResults/unit-coverage.xml
+        working-directory: UnitTestBP
+
       - name: Run BDD Tests with Coverage
         run: |
           dotnet test bpBddTests/bpBddTests.csproj --logger "trx;LogFileName=${{github.workspace}}/TestResults/bdd-tests.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=${{github.workspace}}/TestResults/bdd-coverage.xml
-      
+
       - name: Upload TestResults as artifact
         uses: actions/upload-artifact@v4
         with:
           name: test-resuls
           path: ${{github.workspace}}/TestResults
-      
+
       - name: SonarCloud Begin
         run: |
           dotnet tool install --global dotnet-sonarscanner
           dotnet sonarscanner begin /k:"prashidi_ca1-project-bp" /o:"prashidi" /d:sonar.login="${{ secrets.BP_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="${{ github.workspace }}/TestResults/*coverage.xml" /d:sonar.cs.vstest.reportsPaths="${{ github.workspace }}/TestResults/*.trx"
-      
+
       - name: Build for Sonar
         run: dotnet build
 
       - name: SonarCloud End
         run: dotnet sonarscanner end /d:sonar.login="${{ secrets.BP_TOKEN }}"
-      
+
       # - name: SonarCloud Scan
       #   uses: sonarsource/sonarcloud-github-action@v5.0.0
       #   with:
