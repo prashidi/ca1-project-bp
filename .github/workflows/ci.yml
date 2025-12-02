@@ -45,10 +45,7 @@ jobs:
               /p:CoverletOutput=./TestResults/coverage.xml
 
       - name: Run BDD Tests
-        run: dotnet test bpBddTests/bpBddTests.csproj \
-              /p:CollectCoverage=true \
-              /p:CoverletOutputFormat=opencover \
-              /p:CoverletOutput=./TestResults/coverage2.xml
+        run: dotnet test bpBddTests/bpBddTests.csproj 
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
