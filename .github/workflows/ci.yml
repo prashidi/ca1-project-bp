@@ -43,8 +43,11 @@ jobs:
 
       - name: Run Unit Tests with Coverage
         run: |
-          dotnet test UnitTestBP.csproj --logger "trx;LogFileName=unit-tests.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../TestResults/unit-coverage.xml
-        working-directory: UnitTestBP
+          dotnet test UnitTestBP/UnitTestBP.csproj \
+            --logger "trx;LogFileName=${{ github.workspace }}/TestResults/unit-tests.trx" \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=${{ github.workspace }}/TestResults/unit-coverage.xml
 
       - name: Run BDD Tests with Coverage
         run: |
