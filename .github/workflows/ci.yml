@@ -38,36 +38,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
+      # ✅ Install SonarScanner for .NET
+      - name: Install SonarScanner for .NET
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      # ✅ Begin SonarCloud analysis
+      - name: SonarCloud Begin
+        run: |
+          dotnet-sonarscanner begin \
+            /k:"prashidi_ca1-project-bp" \
+            /o:"prashidi" \
+            /d:sonar.cs.opencover.reportPaths="coveragereport/OpenCover.xml" \
+            /d:sonar.login="${{ secrets.BP_TOKEN }}"
+
       # ✅ Build the solution in Release mode
       - name: Build for Release
-        run: dotnet build --configuration Release
+        run: dotnet build --configuration Release --no-incremental
 
-      # ✅ Run tests with coverage enabled
-      # --results-directory ensures coverage files go into a predictable folder
+      # ✅ Run tests with coverage enabled (OpenCover format)
       - name: Run Unit and BDD Tests with Code Coverage
-        run: dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults
+        run: dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=coveragereport/
 
-      # ✅ Install ReportGenerator tool
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool
-
-      # ✅ Convert .coverage binary files directly to OpenCover format
-      # This avoids the Cobertura → OpenCover double conversion problem
-      - name: Convert .coverage to OpenCover
-        run: |
-          mkdir -p coveragereport
-          for file in $(find TestResults -type f -name '*.coverage'); do
-            reportgenerator -reports:"$file" -targetdir:"coveragereport" -reporttypes:OpenCover
-          done
-
-      # ✅ Run SonarCloud scan and point it to the generated OpenCover.xml
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
-        with:
-          projectBaseDir: .
-          args: >
-            -Dsonar.organization=prashidi
-            -Dsonar.projectKey=prashidi_ca1-project-bp
-            -Dsonar.cs.opencover.reportPaths=coveragereport/OpenCover.xml
-        env:
-          SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
+      # ✅ End SonarCloud analysis
+      - name: SonarCloud End
+        run: dotnet-sonarscanner end /d:sonar.login="${{ secrets.BP_TOKEN }}"
