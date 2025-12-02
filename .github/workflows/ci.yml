@@ -10,62 +10,50 @@ on:
       - staging
   pull_request:
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   ci:
     runs-on: ubuntu-latest
-
     steps:
-      # ✅ Always start by checking out the repo
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # ✅ Install the correct .NET version
-      - name: Set up .NET Core
+      - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # ✅ Cache NuGet packages for faster builds
-      - name: Set up dependency caching for faster builds
-        uses: actions/cache@v3
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-      # ✅ Build the solution in Release mode
-      - name: Build for Release
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build Release
         run: dotnet build --configuration Release
 
-      # ✅ Run tests with coverage enabled
-      # --results-directory ensures coverage files go into a predictable folder
-      - name: Run Unit and BDD Tests with Code Coverage
+      - name: Run tests with Coverage
         run: dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults
 
-      # ✅ Install ReportGenerator tool
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
-      # ✅ Convert .coverage binary files directly to OpenCover format
-      # This avoids the Cobertura → OpenCover double conversion problem
-      - name: Convert .coverage to OpenCover
+      - name: Convert Cobertura to OpenCover
         run: |
           mkdir -p coveragereport
-          for file in $(find TestResults -type f -name '*.coverage'); do
-            reportgenerator -reports:"$file" -targetdir:"coveragereport" -reporttypes:OpenCover
-          done
-      # ✅ Run SonarCloud scan and point it to the generated OpenCover.xml
+          reportgenerator \
+            -reports:"TestResults/**/coverage.cobertura.xml" \
+            -targetdir:"coveragereport" \
+            -reporttypes:OpenCover \
+            -sourcepath:"." \
+            -relative_paths:true
+
       - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
+        uses: sonarsource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
         with:
           projectBaseDir: .
           args: >
             -Dsonar.organization=prashidi
             -Dsonar.projectKey=prashidi_ca1-project-bp
-            -Dsonar.cs.opencover.reportPaths=coveragereport/OpenCover.xml
-        env:
-          SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
+            -Dsonar.cs.opencover.reportsPaths=coveragereport/coverage.opencover.xml
+            -Dsonar.verbose=true
