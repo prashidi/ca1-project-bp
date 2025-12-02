@@ -46,7 +46,7 @@ jobs:
             -sourcepath:"." \
             -relative_paths:true
 
-      - name: SonarCloud Scan
+      - name: SonarCloud Scan - Staging
         uses: sonarsource/sonarcloud-github-action@master
         env:
           SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
