@@ -39,10 +39,16 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: Run unit tests
-        run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage" --verbosity normal -l:trx
+        run: dotnet test UnitTestBP/UnitTestBP.csproj \
+              /p:CollectCoverage=true \
+              /p:CoverletOutputFormat=opencover \
+              /p:CoverletOutput=./TestResults/coverage.xml
 
       - name: Run BDD Tests
-        run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage" --verbosity normal -l:trx
+        run: dotnet test bpBddTests/bpBddTests.csproj \
+              /p:CollectCoverage=true \
+              /p:CoverletOutputFormat=opencover \
+              /p:CoverletOutput=./TestResults/coverage2.xml
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
@@ -51,5 +57,7 @@ jobs:
           args: >
             -Dsonar.organization=prashidi
             -Dsonar.projectKey=prashidi_ca1-project-bp
+            -Dsonar.cs.opencover.reportsPaths=**/coverage.xml
+
         env:
           SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
