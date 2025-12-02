@@ -44,8 +44,15 @@ jobs:
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
       
-      - name: Convert coverage to OpenCover
-        run: reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:OpenCover
+      - name: Extract coverage from .coverage file
+        run: |
+          mkdir -p coverage
+          for file in $(find . -type f -name '*.coverage'); do
+            reportgenerator -reports:"$file" -targetdir:"coverage" -reporttypes:Cobertura
+          done
+      
+      - name: Convert Cobertura to OpenCover
+        run: reportgenerator -reports:coverage/Cobertura.xml -targetdir:coveragereport -reporttypes:OpenCover
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
@@ -54,5 +61,6 @@ jobs:
           args: >
             -Dsonar.organization=prashidi
             -Dsonar.projectKey=prashidi_ca1-project-bp
+            -Dsonar.cs.opencover.reportPaths=coveragereport/OpenCover.xml
         env:
           SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
