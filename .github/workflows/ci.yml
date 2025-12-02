@@ -39,15 +39,21 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: Run Unit and BDD Tests with Code Coverage
-        run: dotnet test --collect:"XPlat Code Coverage"
+        run: dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults
       
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
       
-      - name: Extract coverage from .coverage file
+      # - name: Extract coverage from .coverage file
+      #   run: |
+      #     mkdir -p coverage
+      #     for file in $(find . -type f -name '*.coverage'); do
+      #       reportgenerator -reports:"$file" -targetdir:"coverage" -reporttypes:Cobertura
+      #     done
+      - name: Convert .coverage to Cobertura
         run: |
           mkdir -p coverage
-          for file in $(find . -type f -name '*.coverage'); do
+          for file in $(find TestResults -type f -name '*.coverage'); do
             reportgenerator -reports:"$file" -targetdir:"coverage" -reporttypes:Cobertura
           done
       
