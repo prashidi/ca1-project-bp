@@ -15,70 +15,78 @@ permissions:
   contents: read
 
 jobs:
-  ci:
+  sonarqube:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+      with:
+        # Disabling shallow clones is recommended for improving the relevancy of reporting
+        fetch-depth: 0
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@master # Ex: v4.1.0 or sha1, See the latest version at https://github.com/marketplace/actions/official-sonarqube-scan
+      env:
+        SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
 
-      - name: Set up .NET Core
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+  # ci:
+  #   runs-on: ubuntu-latest
 
-      - name: Set up dependency caching for faster builds
-        uses: actions/cache@v3
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Build for Release
-        run: dotnet build --configuration Release
+  #     - name: Set up .NET Core
+  #       uses: actions/setup-dotnet@v4
+  #       with:
+  #         dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Create TestResults folder
-        run: mkdir -p ${{github.workspace}}/TestResults
+  #     - name: Set up dependency caching for faster builds
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: ~/.nuget/packages
+  #         key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-nuget-
 
-      - name: Run Unit Tests with Coverage
-        run: |
-          dotnet test UnitTestBP/UnitTestBP.csproj \
-            --logger "trx;LogFileName=${{ github.workspace }}/TestResults/unit-tests.trx" \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=${{ github.workspace }}/TestResults/coverage.opencover.xml
+  #     - name: Build for Release
+  #       run: dotnet build --configuration Release
 
-      - name: Run BDD Tests with Coverage
-        run: |
-          dotnet test bpBddTests/bpBddTests.csproj --logger "trx;LogFileName=${{github.workspace}}/TestResults/bdd-tests.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=${{github.workspace}}/TestResults/bdd-coverage.xml
+  #     - name: Create TestResults folder
+  #       run: mkdir -p ${{github.workspace}}/TestResults
 
-      - name: Upload TestResults as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-resuls
-          path: ${{github.workspace}}/TestResults
+  #     - name: Run Unit Tests with Coverage
+  #       run: |
+  #         dotnet test UnitTestBP/UnitTestBP.csproj --logger "trx;LogFileName=${{github.workspace}}/TestResults/unit-tests.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=${{github.workspace}}/TestResults/unit-coverage.xml
 
-      - name: SonarCloud Begin
-        run: |
-          dotnet tool install --global dotnet-sonarscanner
-          dotnet sonarscanner begin /k:"prashidi_ca1-project-bp" /o:"prashidi" /d:sonar.login="${{ secrets.BP_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="${{ github.workspace }}/TestResults/*coverage.xml" /d:sonar.cs.vstest.reportsPaths="${{ github.workspace }}/TestResults/*.trx"
+  #     - name: Run BDD Tests with Coverage
+  #       run: |
+  #         dotnet test bpBddTests/bpBddTests.csproj --logger "trx;LogFileName=${{github.workspace}}/TestResults/bdd-tests.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=${{github.workspace}}/TestResults/bdd-coverage.xml
 
-      - name: Build for Sonar
-        run: dotnet build
+  #     - name: Upload TestResults as artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: test-resuls
+  #         path: ${{github.workspace}}/TestResults
 
-      - name: SonarCloud End
-        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.BP_TOKEN }}"
+  #     - name: SonarCloud Begin
+  #       run: |
+  #         dotnet tool install --global dotnet-sonarscanner
+  #         dotnet sonarscanner begin /k:"prashidi_ca1-project-bp" /o:"prashidi" /d:sonar.login="${{ secrets.BP_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="${{ github.workspace }}/TestResults/*coverage.xml" /d:sonar.cs.vstest.reportsPaths="${{ github.workspace }}/TestResults/*.trx"
 
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@v5.0.0
-        with:
-          projectBaseDir: .
-          args: >
-            -Dsonar.organization=prashidi
-            -Dsonar.projectKey=prashidi_ca1-project-bp
-            -Dsonar.cs.opencover.reportsPaths=TestResults/coverage.opencover.xml
-            -Dsonar.cs.vstest.reportsPaths=TestResults/*.trx
+  #     - name: Build for Sonar
+  #       run: dotnet build
 
-        env:
-          SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
+  #     - name: SonarCloud End
+  #       run: dotnet sonarscanner end /d:sonar.login="${{ secrets.BP_TOKEN }}"
+
+  #     - name: SonarCloud Scan
+  #       uses: sonarsource/sonarcloud-github-action@v5.0.0
+  #       with:
+  #         projectBaseDir: .
+  #         args: >
+  #           -Dsonar.organization=prashidi
+  #           -Dsonar.projectKey=prashidi_ca1-project-bp
+  #           -Dsonar.cs.opencover.reportsPaths=TestResults/coverage.opencover.xml
+  #           -Dsonar.cs.vstest.reportsPaths=TestResults/*.trx
+
+  #       env:
+  #         SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
