@@ -13,9 +13,6 @@ param appServicePlanName string = '${appServiceName}-plan'
 @description('App Service Plan SKU')
 param sku string = 'S1'
 
-// ------------------------------------------------------------
-// APP SERVICE PLAN
-// ------------------------------------------------------------
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   name: appServicePlanName
   location: location
@@ -27,9 +24,6 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   }
 }
 
-// ------------------------------------------------------------
-// APPLICATION INSIGHTS
-// ------------------------------------------------------------
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: '${appServiceName}-ai'
   location: location
@@ -39,9 +33,6 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-// ------------------------------------------------------------
-// APP SERVICE — PRODUCTION SLOT
-// ------------------------------------------------------------
 resource app 'Microsoft.Web/sites@2022-03-01' = {
   name: appServiceName
   location: location
@@ -71,21 +62,16 @@ resource app 'Microsoft.Web/sites@2022-03-01' = {
   }
 }
 
-// ------------------------------------------------------------
-// STAGING SLOT (ONLY WHEN ENV == staging)
-// ------------------------------------------------------------
 resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (environment == 'staging') {
-  name: 'staging'
   parent: app
+  name: 'staging'
   location: location
   properties: {
     serverFarmId: appServicePlan.id
     httpsOnly: true
-
     siteConfig: {
       netFrameworkVersion: 'v8.0'
       alwaysOn: false
-
       appSettings: [
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
@@ -104,8 +90,5 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (environment ==
   }
 }
 
-// ------------------------------------------------------------
-// OUTPUTS
-// ------------------------------------------------------------
 output appServiceUrl string = app.properties.defaultHostName
 output appInsightsKey string = appInsights.properties.InstrumentationKey
