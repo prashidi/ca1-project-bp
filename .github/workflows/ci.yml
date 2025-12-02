@@ -39,10 +39,10 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: Run unit tests
-        run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage"
+        run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage" --verbosity normal -l:trx
 
       - name: Run BDD Tests
-        run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage"
+        run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage" --verbosity normal -l:trx
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
