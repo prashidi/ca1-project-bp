@@ -2,32 +2,36 @@
 param appServiceName string
 
 @description('Location for all resources')
-@allowed([
-  'northeurope'
-  'westeurope'
-])
 param location string = 'northeurope'
 
-@description('Deployment environment')
-@allowed([
-  'staging'
-  'production'
-])
+@description('Environment: staging or production')
 param environment string = 'production'
 
-@description('Resource ID of the existing App Service Plan')
-param appServicePlanId string
+@description('App Service Plan name')
+param appServicePlanName string = '${appServiceName}-plan'
 
-// Extract name from resourceId
-var appServicePlanName = last(split(appServicePlanId, '/'))
+@description('App Service Plan SKU')
+param sku string = 'B1'
 
 
-// EXISTING APP SERVICE PLAN
-resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' existing = {
+// ------------------------------------------------------------
+// APP SERVICE PLAN
+// ------------------------------------------------------------
+resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   name: appServicePlanName
+  location: location
+  sku: {
+    name: sku
+    tier: 'Basic'
+    size: sku
+    capacity: 1
+  }
 }
 
+
+// ------------------------------------------------------------
 // APPLICATION INSIGHTS
+// ------------------------------------------------------------
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: '${appServiceName}-ai'
   location: location
@@ -37,16 +41,21 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-// APP SERVICE (PRODUCTION)
+
+// ------------------------------------------------------------
+// APP SERVICE — PRODUCTION SLOT
+// ------------------------------------------------------------
 resource app 'Microsoft.Web/sites@2022-03-01' = {
   name: appServiceName
   location: location
   properties: {
-    serverFarmId: appServicePlanId
+    serverFarmId: appServicePlan.id
     httpsOnly: true
+
     siteConfig: {
-      netFrameworkVersion: 'v9.0'
+      netFrameworkVersion: 'v8.0'
       alwaysOn: true
+
       appSettings: [
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
@@ -54,28 +63,33 @@ resource app 'Microsoft.Web/sites@2022-03-01' = {
         }
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: 'InstrumentationKey=${appInsights.properties.InstrumentationKey}'
+          value: appInsights.properties.ConnectionString
         }
         {
           name: 'ENVIRONMENT'
-          value: environment
+          value: 'production'
         }
       ]
     }
   }
 }
 
-// STAGING SLOT (only if environment == staging)
+
+// ------------------------------------------------------------
+// STAGING SLOT (ONLY WHEN ENV == staging)
+// ------------------------------------------------------------
 resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (environment == 'staging') {
   name: 'staging'
   parent: app
   location: location
   properties: {
-    serverFarmId: appServicePlanId
+    serverFarmId: appServicePlan.id
     httpsOnly: true
+
     siteConfig: {
-      netFrameworkVersion: 'v9.0'
+      netFrameworkVersion: 'v8.0'
       alwaysOn: false
+
       appSettings: [
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
@@ -83,7 +97,7 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (environment ==
         }
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: 'InstrumentationKey=${appInsights.properties.InstrumentationKey}'
+          value: appInsights.properties.ConnectionString
         }
         {
           name: 'ENVIRONMENT'
@@ -94,5 +108,8 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (environment ==
   }
 }
 
-output appServiceUrl string = 'https://${app.properties.defaultHostName}'
+// ------------------------------------------------------------
+// OUTPUTS
+// ------------------------------------------------------------
+output appServiceUrl string = app.properties.defaultHostName
 output appInsightsKey string = appInsights.properties.InstrumentationKey
