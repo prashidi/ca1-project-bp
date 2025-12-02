@@ -56,7 +56,7 @@ jobs:
           path: ${{github.workspace}}/TestResults
 
       - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
+        uses: sonarsource/sonarcloud-github-action@v5.0.0
         with:
           projectBaseDir: .
           args: >
