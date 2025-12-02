@@ -19,14 +19,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ✅ Always start by checking out the repo
       - name: Checkout
         uses: actions/checkout@v4
 
+      # ✅ Install the correct .NET version
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      # ✅ Cache NuGet packages for faster builds
       - name: Set up dependency caching for faster builds
         uses: actions/cache@v3
         with:
@@ -34,32 +37,30 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
-      
+
+      # ✅ Build the solution in Release mode
       - name: Build for Release
         run: dotnet build --configuration Release
 
+      # ✅ Run tests with coverage enabled
+      # --results-directory ensures coverage files go into a predictable folder
       - name: Run Unit and BDD Tests with Code Coverage
         run: dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults
-      
+
+      # ✅ Install ReportGenerator tool
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
-      
-      # - name: Extract coverage from .coverage file
-      #   run: |
-      #     mkdir -p coverage
-      #     for file in $(find . -type f -name '*.coverage'); do
-      #       reportgenerator -reports:"$file" -targetdir:"coverage" -reporttypes:Cobertura
-      #     done
-      - name: Convert .coverage to Cobertura
-        run: |
-          mkdir -p coverage
-          for file in $(find TestResults -type f -name '*.coverage'); do
-            reportgenerator -reports:"$file" -targetdir:"coverage" -reporttypes:Cobertura
-          done
-      
-      - name: Convert Cobertura to OpenCover
-        run: reportgenerator -reports:coverage/Cobertura.xml -targetdir:coveragereport -reporttypes:OpenCover
 
+      # ✅ Convert .coverage binary files directly to OpenCover format
+      # This avoids the Cobertura → OpenCover double conversion problem
+      - name: Convert .coverage to OpenCover
+        run: |
+          mkdir -p coveragereport
+          for file in $(find TestResults -type f -name '*.coverage'); do
+            reportgenerator -reports:"$file" -targetdir:"coveragereport" -reporttypes:OpenCover
+          done
+
+      # ✅ Run SonarCloud scan and point it to the generated OpenCover.xml
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         with:
