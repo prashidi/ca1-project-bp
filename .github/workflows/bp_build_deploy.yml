@@ -36,7 +36,7 @@ jobs:
       - name: Build for Release
         run: dotnet build --configuration Release
 
-      - name: Run unit tests
+      - name: Run unit tests with coverage
         run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage"
 
       - name: Run BDD Tests
