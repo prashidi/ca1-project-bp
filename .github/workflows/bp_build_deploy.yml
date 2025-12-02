@@ -74,8 +74,46 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # Deploy IaC using bicep template
+      # # Deploy IaC using bicep template
 
+      # - name: Deploy IaC (Bicep)
+      #   uses: azure/arm-deploy@v2
+      #   with:
+      #     subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #     resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+      #     template: templates/main.bicep
+      #     parameters: >
+      #       appServiceName=${{ env.AZURE_WEBAPP_NAME }}
+      #       location=northeurope
+      #       environment=${{ github.ref == 'refs/heads/staging' && 'staging' || 'production' }}
+
+      # # Deploy App code to STAGING slot on staging branch
+      # - name: Deploy code to Staging Slot
+      #   if: github.ref == 'refs/heads/staging'
+      #   uses: azure/webapps-deploy@v2
+      #   with:
+      #     subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #     resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+      #     app-name: ${{ env.AZURE_WEBAPP_NAME }}
+      #     slot-name: "staging"
+      #     publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_STAGING }}
+      #     package: myapp
+
+      # # Deploy App code to PRODUCTION on main branch
+      # - name: Deploy code to Production
+      #   if: github.ref == 'refs/heads/main'
+      #   uses: azure/webapps-deploy@v2
+      #   with:
+      #     subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #     resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+      #     app-name: ${{ env.AZURE_WEBAPP_NAME }}
+      #     publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+      #     package: myapp
+
+
+    # -------------------------------------------------
+      # DEPLOY IAC (NOTE: You MUST pass environment)
+      # -------------------------------------------------
       - name: Deploy IaC (Bicep)
         uses: azure/arm-deploy@v2
         with:
@@ -85,26 +123,27 @@ jobs:
           parameters: >
             appServiceName=${{ env.AZURE_WEBAPP_NAME }}
             location=northeurope
+            environment=${{ github.ref == 'refs/heads/staging' && 'staging' || 'production' }}
 
-      # Deploy App code to STAGING slot on staging branch
+      # -------------------------------------------------
+      # DEPLOY CODE TO STAGING SLOT
+      # -------------------------------------------------
       - name: Deploy code to Staging Slot
         if: github.ref == 'refs/heads/staging'
         uses: azure/webapps-deploy@v2
         with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: "staging"
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_STAGING }}
           package: myapp
 
-      # Deploy App code to PRODUCTION on main branch
+      # -------------------------------------------------
+      # DEPLOY CODE TO PRODUCTION
+      # -------------------------------------------------
       - name: Deploy code to Production
         if: github.ref == 'refs/heads/main'
         uses: azure/webapps-deploy@v2
         with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: myapp

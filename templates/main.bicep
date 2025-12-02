@@ -21,16 +21,13 @@ param appServicePlanId string
 // Extract name from resourceId
 var appServicePlanName = last(split(appServicePlanId, '/'))
 
-// =============================
+
 // EXISTING APP SERVICE PLAN
-// =============================
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' existing = {
   name: appServicePlanName
 }
 
-// =============================
 // APPLICATION INSIGHTS
-// =============================
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: '${appServiceName}-ai'
   location: location
@@ -40,9 +37,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-// =============================
 // APP SERVICE (PRODUCTION)
-// =============================
 resource app 'Microsoft.Web/sites@2022-03-01' = {
   name: appServiceName
   location: location
@@ -70,9 +65,7 @@ resource app 'Microsoft.Web/sites@2022-03-01' = {
   }
 }
 
-// =============================
 // STAGING SLOT (only if environment == staging)
-// =============================
 resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (environment == 'staging') {
   name: 'staging'
   parent: app
