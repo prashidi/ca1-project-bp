@@ -53,36 +53,46 @@ jobs:
           path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
-    permissions:
-      contents: none
     runs-on: ubuntu-latest
     needs: build
-    environment:
-      name: "Development"
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: .net-app
+          path: myapp
 
-      # Deploy to STAGING slot when pushing to staging branch
-      - name: Deploy to Staging slot
+      # Deploy IaC using bicep template
+
+      - name: Deploy IaC (Bicep)
+        uses: azure/arm-deploy@v2
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          template: ./template/main.bicep
+          parameters: >
+            appServiceName=${{ env.AZURE_WEBAPP_NAME }}
+            location=northeurope
+
+      # Deploy App code to STAGING slot on staging branch
+      - name: Deploy to Staging Slot
         if: github.ref == 'refs/heads/staging'
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: "staging"
-          template: ./templates/main.bicep
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_STAGING }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          package: myapp
 
-      # Deploy to PRODUCTION when pushing to main
+      # Deploy App code to PRODUCTION on main branch
       - name: Deploy to Production
         if: github.ref == 'refs/heads/main'
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          package: myapp
