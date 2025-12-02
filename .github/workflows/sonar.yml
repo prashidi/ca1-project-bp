@@ -1,22 +1,57 @@
 # Sonar cloud scan
 
 name: BP - SonarCloud
+
 on:
-  workflow_dispatch:                             
+  workflow_dispatch:
 
 jobs:
   scan_code:
     runs-on: ubuntu-latest
+
     steps:
+      # 1. Checkout
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  
+          fetch-depth: 0
+
+      # 2. Setup .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      # 3. Restore
+      - name: Restore
+        run: dotnet restore
+
+      # 4. Run ALL tests (unit + BDD) with XPlat Code Coverage
+      - name: Run Tests with Coverage
+        run: dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults
+
+      # 5. Install ReportGenerator
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      # 6. Convert Cobertura -> OpenCover
+      - name: Convert Coverage to OpenCover
+        run: |
+          mkdir -p coveragereport
+          reportgenerator \
+            -reports:"TestResults/**/coverage.cobertura.xml" \
+            -targetdir:"coveragereport" \
+            -reporttypes:OpenCover \
+            -relative_paths:true
+
+      # 7. SonarCloud Scan with coverage path
       - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
+        uses: sonarsource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
         with:
           projectBaseDir: .
           args: >
             -Dsonar.organization=prashidi
             -Dsonar.projectKey=prashidi_ca1-project-bp
-        env:
-          SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
+            -Dsonar.cs.opencover.reportsPaths=coveragereport/coverage.opencover.xml
+            -Dsonar.verbose=true
