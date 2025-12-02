@@ -2,34 +2,32 @@
 param appServiceName string
 
 @description('Location for all resources')
+@allowed([
+  'northeurope'
+  'westeurope'
+])
 param location string = 'northeurope'
 
-@description('Environment: staging or production')
+@description('Deployment environment')
+@allowed([
+  'staging'
+  'production'
+])
 param environment string = 'production'
 
-@description('Name of the App Service Plan')
-param appServicePlanName string = '${appServiceName}-plan'
+@description('Resource ID of the existing App Service Plan')
+param appServicePlanId string
 
-@description('App Service Plan SKU')
-param sku string = 'B1' // Basic B1 supports slots
-
-
-// APP SERVICE PLAN
-resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
-  name: appServicePlanName
-  location: location
-  sku: {
-    name: sku
-    tier: 'Basic'
-    size: sku
-    capacity: 1
-  }
-  properties: {
-    reserved: false
-  }
+// =============================
+// EXISTING APP SERVICE PLAN
+// =============================
+resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' existing = {
+  id: appServicePlanId
 }
 
+// =============================
 // APPLICATION INSIGHTS
+// =============================
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: '${appServiceName}-ai'
   location: location
@@ -39,7 +37,9 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-// APP SERVICE (PRODUCTION SLOT)
+// =============================
+// APP SERVICE (PRODUCTION SITE)
+// =============================
 resource app 'Microsoft.Web/sites@2022-03-01' = {
   name: appServiceName
   location: location
@@ -47,7 +47,8 @@ resource app 'Microsoft.Web/sites@2022-03-01' = {
     serverFarmId: appServicePlan.id
     httpsOnly: true
     siteConfig: {
-      netFrameworkVersion: 'v8.0'
+      // .NET 9 as per your app config
+      netFrameworkVersion: 'v9.0'
       alwaysOn: true
       appSettings: [
         {
@@ -56,14 +57,21 @@ resource app 'Microsoft.Web/sites@2022-03-01' = {
         }
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: appInsights.properties.ConnectionString
+          // Build connection string from InstrumentationKey
+          value: 'InstrumentationKey=${appInsights.properties.InstrumentationKey}'
+        }
+        {
+          name: 'ENVIRONMENT'
+          value: environment
         }
       ]
     }
   }
 }
 
-// STAGING SLOT (ONLY IF environment == 'staging')
+// =============================
+// STAGING SLOT (ONLY WHEN environment == "staging")
+// =============================
 resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (environment == 'staging') {
   name: 'staging'
   parent: app
@@ -72,7 +80,7 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (environment ==
     serverFarmId: appServicePlan.id
     httpsOnly: true
     siteConfig: {
-      netFrameworkVersion: 'v8.0'
+      netFrameworkVersion: 'v9.0'
       alwaysOn: false
       appSettings: [
         {
@@ -81,7 +89,7 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (environment ==
         }
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: appInsights.properties.ConnectionString
+          value: 'InstrumentationKey=${appInsights.properties.InstrumentationKey}'
         }
         {
           name: 'ENVIRONMENT'
@@ -92,5 +100,8 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (environment ==
   }
 }
 
-output appServiceUrl string = app.properties.defaultHostName
+// =============================
+// OUTPUTS
+// =============================
+output appServiceUrl string = 'https://${app.properties.defaultHostName}'
 output appInsightsKey string = appInsights.properties.InstrumentationKey

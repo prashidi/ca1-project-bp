@@ -87,7 +87,7 @@ jobs:
             location=northeurope
 
       # Deploy App code to STAGING slot on staging branch
-      - name: Deploy to Staging Slot
+      - name: Deploy code to Staging Slot
         if: github.ref == 'refs/heads/staging'
         uses: azure/webapps-deploy@v2
         with:
@@ -99,7 +99,7 @@ jobs:
           package: myapp
 
       # Deploy App code to PRODUCTION on main branch
-      - name: Deploy to Production
+      - name: Deploy code to Production
         if: github.ref == 'refs/heads/main'
         uses: azure/webapps-deploy@v2
         with:
