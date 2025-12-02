@@ -36,7 +36,7 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Build for Release
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --configuration Release
 
       - name: Run unit tests
         run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage"
