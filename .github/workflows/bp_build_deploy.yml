@@ -81,7 +81,7 @@ jobs:
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
-          template: ./template/main.bicep
+          template: ../template/main.bicep
           parameters: >
             appServiceName=${{ env.AZURE_WEBAPP_NAME }}
             location=northeurope
