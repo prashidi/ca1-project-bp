@@ -37,22 +37,22 @@ jobs:
 
       - name: Build for Release
         run: dotnet build --configuration Release
+
+      - name: Run Unit Tests with Coverage
+        run: |
+          mkdir -p TestResults
+          dotnet test UnitTestBP/UnitTestBP.csproj --logger "trx;LogFileName=../TestResults/unit-tests.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../TestResults/unit-coverage.xml
       
-      - name: Create TestResults folder
-        run: mkdir -p TestResults
-
-      - name: Run unit tests
-        run: dotnet test UnitTestBP/UnitTestBP.csproj --logger "trx;LogFileName=unit-tests.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/unit-coverage.xml
-
-      - name: Run BDD Tests
-        run: dotnet test bpBddTests/bpBddTests.csproj --logger "trx;LogFileName=bdd-tests.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/bdd-coverage.xml
+      - name: Run BDD Tests with Coverage
+        run: |
+          dotnet test bpBddTests/bpBddTests.csproj --logger "trx;LogFileName=../TestResults/bdd-tests.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../TestResults/bdd-coverage.xml
       
       - name: Upload TestResults as artifact
         uses: actions/upload-artifact@v4
         with:
           name: TestResults
           path: TestResults
-          
+
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         with:
