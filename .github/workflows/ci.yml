@@ -39,18 +39,10 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: Run unit tests
-        run: dotnet test UnitTestBP/UnitTestBP.csproj \
-            --logger "trx;LogFileName=unit-tests.trx" \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=./TestResults/unit-coverage.xml
+        run: dotnet test UnitTestBP/UnitTestBP.csproj --logger "trx;LogFileName=unit-tests.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/unit-coverage.xml
 
       - name: Run BDD Tests
-        run: dotnet test bpBddTests/bpBddTests.csproj
-            --logger "trx;LogFileName=bdd-tests.trx" \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=./TestResults/bdd-coverage.xml
+        run: dotnet test bpBddTests/bpBddTests.csproj --logger "trx;LogFileName=bdd-tests.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/bdd-coverage.xml
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
