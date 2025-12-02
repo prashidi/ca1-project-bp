@@ -50,7 +50,6 @@ jobs:
             /o:"prashidi" \
             /d:sonar.cs.opencover.reportPaths="coveragereport/OpenCover.xml" \
             /d:sonar.login="${{ secrets.BP_TOKEN }}"
-            /d:sonar.tests="UnitTestBP"
             /d:sonar.exclusions="**/*.DS_Store"
 
 
