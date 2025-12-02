@@ -54,16 +54,27 @@ jobs:
         with:
           name: test-resuls
           path: ${{github.workspace}}/TestResults
+      
+      - name: SonarCloud Begin
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          dotnet sonarscanner begin /k:"prashidi_ca1-project-bp" /o:"prashidi" /d:sonar.login="${{ secrets.BP_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="${{ github.workspace }}/TestResults/*coverage.xml" /d:sonar.cs.vstest.reportsPaths="${{ github.workspace }}/TestResults/*.trx"
+      
+      - name: Build for Sonar
+        run: dotnet build
 
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@v5.0.0
-        with:
-          projectBaseDir: .
-          args: >
-            -Dsonar.organization=prashidi
-            -Dsonar.projectKey=prashidi_ca1-project-bp
-            -Dsonar.cs.opencover.reportsPaths=TestResults/*coverage.xml
-            -Dsonar.cs.vstest.reportsPaths=TestResults/*.trx
+      - name: SonarCloud End
+        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.BP_TOKEN }}"
+      
+      # - name: SonarCloud Scan
+      #   uses: sonarsource/sonarcloud-github-action@v5.0.0
+      #   with:
+      #     projectBaseDir: .
+      #     args: >
+      #       -Dsonar.organization=prashidi
+      #       -Dsonar.projectKey=prashidi_ca1-project-bp
+      #       -Dsonar.cs.opencover.reportsPaths=TestResults/*coverage.xml
+      #       -Dsonar.cs.vstest.reportsPaths=TestResults/*.trx
 
-        env:
-          SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
