@@ -1,0 +1,59 @@
+name: BP - CI (Build and Unit BDD Tests)
+
+env:
+  DOTNET_VERSION: "9"
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build Release
+        run: dotnet build --configuration Release
+
+      - name: Run tests with Coverage
+        run: dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Convert Cobertura to OpenCover
+        run: |
+          mkdir -p coveragereport
+          reportgenerator \
+            -reports:"TestResults/**/coverage.cobertura.xml" \
+            -targetdir:"coveragereport" \
+            -reporttypes:OpenCover \
+            -sourcepath:"." \
+            -relative_paths:true
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=prashidi
+            -Dsonar.projectKey=prashidi_ca1-project-bp
+            -Dsonar.cs.opencover.reportsPaths=coveragereport/coverage.opencover.xml
+            -Dsonar.verbose=true
