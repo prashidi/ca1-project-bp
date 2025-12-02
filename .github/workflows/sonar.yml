@@ -29,6 +29,11 @@ jobs:
       - name: Run Tests with Coverage
         run: dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults
 
+      - name: DEBUG — list TestResults folder
+        run: |
+          echo "=== TestResults folder ==="
+          find TestResults -type f -maxdepth 5 -print
+
       # 5. Install ReportGenerator
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
@@ -45,7 +50,7 @@ jobs:
 
       # 7. SonarCloud Scan with coverage path
       - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@v2
+        uses: sonarsource/sonarcloud-github-action@master
         env:
           SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
         with:
