@@ -42,6 +42,7 @@ jobs:
         run: mkdir -p ${{github.workspace}}/TestResults
 
       - name: Run Unit Tests and Generate Coverage
+        id: run-tests
         uses: alsi-lawr/dotnet-test-coverlet@v1
         with:
           project: UnitTestBP/UnitTestBP.csproj
