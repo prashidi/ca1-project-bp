@@ -52,7 +52,6 @@ jobs:
             /d:sonar.login="${{ secrets.BP_TOKEN }}"
             /d:sonar.exclusions="**/*.DS_Store"
 
-
       # ✅ Build the solution in Release mode
       - name: Build for Release
         run: dotnet build --configuration Release --no-incremental
