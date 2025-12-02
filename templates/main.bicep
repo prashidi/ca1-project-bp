@@ -18,11 +18,14 @@ param environment string = 'production'
 @description('Resource ID of the existing App Service Plan')
 param appServicePlanId string
 
+// Extract name from resourceId
+var appServicePlanName = last(split(appServicePlanId, '/'))
+
 // =============================
 // EXISTING APP SERVICE PLAN
 // =============================
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' existing = {
-  id: appServicePlanId
+  name: appServicePlanName
 }
 
 // =============================
@@ -38,16 +41,15 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 }
 
 // =============================
-// APP SERVICE (PRODUCTION SITE)
+// APP SERVICE (PRODUCTION)
 // =============================
 resource app 'Microsoft.Web/sites@2022-03-01' = {
   name: appServiceName
   location: location
   properties: {
-    serverFarmId: appServicePlan.id
+    serverFarmId: appServicePlanId
     httpsOnly: true
     siteConfig: {
-      // .NET 9 as per your app config
       netFrameworkVersion: 'v9.0'
       alwaysOn: true
       appSettings: [
@@ -57,7 +59,6 @@ resource app 'Microsoft.Web/sites@2022-03-01' = {
         }
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          // Build connection string from InstrumentationKey
           value: 'InstrumentationKey=${appInsights.properties.InstrumentationKey}'
         }
         {
@@ -70,14 +71,14 @@ resource app 'Microsoft.Web/sites@2022-03-01' = {
 }
 
 // =============================
-// STAGING SLOT (ONLY WHEN environment == "staging")
+// STAGING SLOT (only if environment == staging)
 // =============================
 resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (environment == 'staging') {
   name: 'staging'
   parent: app
   location: location
   properties: {
-    serverFarmId: appServicePlan.id
+    serverFarmId: appServicePlanId
     httpsOnly: true
     siteConfig: {
       netFrameworkVersion: 'v9.0'
@@ -100,8 +101,5 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (environment ==
   }
 }
 
-// =============================
-// OUTPUTS
-// =============================
 output appServiceUrl string = 'https://${app.properties.defaultHostName}'
 output appInsightsKey string = appInsights.properties.InstrumentationKey
