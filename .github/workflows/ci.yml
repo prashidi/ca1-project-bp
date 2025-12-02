@@ -1,0 +1,55 @@
+name: BP - CI (Build, Unit Test, BDD, Code Quality)
+
+env:
+  DOTNET_VERSION: "9"
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Set up dependency caching for faster builds
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Build for Release
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run unit tests
+        run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage"
+
+      - name: Run BDD Tests
+        run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage"
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=prashidi
+            -Dsonar.projectKey=prashidi_ca1-project-bp
+        env:
+          SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
