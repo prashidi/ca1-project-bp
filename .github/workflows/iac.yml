@@ -52,6 +52,9 @@ jobs:
             location=northeurope
             environment=${{ github.ref == 'refs/heads/staging' && 'staging' || 'production' }}
 
+      - name: dotnet publish
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+
       # DEPLOY CODE TO STAGING SLOT
       - name: Deploy code to Staging Slot
         if: github.ref == 'refs/heads/staging'
