@@ -48,11 +48,10 @@ jobs:
           dotnet sonarscanner begin \
             /k:"prashidi_ca1-project-bp" \
             /o:"prashidi" \
+            /d:sonar.projectBaseDir="${GITHUB_WORKSPACE}" \
             /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.opencover.reportsPaths="**/TestResults/*/coverage*.opencover.xml" \
-            /d:sonar.coverage.exclusions="**/*.cshtml" \
-            /d:sonar.scm.exclusions.disabled=true
+            /d:sonar.cs.opencover.reportsPaths="*/TestResults//coverage*.opencover.xml"
 
       # -------------------
       # BUILD SOLUTION
