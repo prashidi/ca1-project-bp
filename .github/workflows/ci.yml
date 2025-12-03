@@ -7,8 +7,7 @@ on:
   push:
     branches:
       - main
-      - development
-      - "**"
+      - staging
   pull_request:
 
 jobs:
@@ -62,8 +61,12 @@ jobs:
       - name: Find path
         run: find . -type f -name "coverage*.opencover.xml"
       # --- SONAR END ---
+
       - name: SonarCloud - End
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+      
+      - name: Run Dependency Checker
+        uses: ./.github/workflows/depcheck.yml

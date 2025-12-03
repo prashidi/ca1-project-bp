@@ -4,7 +4,8 @@
 name: BP - OWASP Dependency Checker       
   
 on:
-  workflow_call
+  workflow_dispatch:
+  workflow_call:
 
 
 jobs:
