@@ -1,33 +1,46 @@
-name: BP - CI (Build, Unit Test, BDD, Code Quality)
+name: BP - CI (Build, Test, Coverage, Sonar)
 
 env:
   DOTNET_VERSION: "9"
 
 on:
   push:
-    branches:
-      - main
-      - staging
+    branches: [ main, staging ]
   pull_request:
+    branches: [ main, staging ]
 
 jobs:
-  ci-build-test-sonar:
+  build-test-sonar:
     runs-on: ubuntu-latest
+
     steps:
+      # -------------------
+      # CHECKOUT
+      # -------------------
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # -------------------
+      # .NET SETUP
+      # -------------------
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      # -------------------
+      # INSTALL SONARSCANNER
+      # -------------------
       - name: Install SonarScanner for .NET
         run: |
           dotnet tool install --global dotnet-sonarscanner
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      # -------------------
+      # SONARCLOUD BEGIN
+      # -------------------
       - name: SonarCloud - Begin
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -35,30 +48,52 @@ jobs:
           dotnet sonarscanner begin \
             /k:"prashidi_ca1-project-bp" \
             /o:"prashidi" \
-            /d:sonar.tests="UnitTestBP,bpBddTests"
-            /d:sonar.token="$SONAR_TOKEN" \
-            /d:sonar.sources="." \
-            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/*.opencover.xml"
+            /d:sonar.token="${SONAR_TOKEN}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/*/coverage*.opencover.xml" \
+            /d:sonar.coverage.exclusions="**/*.cshtml" \
+            /d:sonar.scm.exclusions.disabled=true
 
+      # -------------------
+      # BUILD SOLUTION
+      # -------------------
       - name: Build Solution
         run: dotnet build BPCalculator.sln --configuration Release
 
-      - name: Run Tests with Coverage (Unit + Acceptance)
+      # -------------------
+      # RUN TESTS WITH COVERAGE
+      # -------------------
+      - name: Run Tests with Coverage (Unit + BDD)
         run: |
+          echo "Running UNIT tests"
           dotnet test UnitTestBP/UnitTestBP.csproj \
-            --configuration Release \
+            --no-build \
             /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=TestResults/coverage.unit.
+            /p:CoverletOutput=TestResults/coverage.unit. \
+            /p:CoverletOutputFormat=opencover
+
+          echo "Running BDD tests"
           dotnet test bpBddTests/bpBddTests.csproj \
-            --configuration Release \
+            --no-build \
             /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=TestResults/coverage.acceptance.
-      # --- SONAR END ---
-      
+            /p:CoverletOutput=TestResults/coverage.acceptance. \
+            /p:CoverletOutputFormat=opencover
+
+      # -------------------
+      # VERIFY COVERAGE FILES
+      # -------------------
+      - name: Verify Coverage Files
+        run: |
+          echo "Coverage files found:"
+          find . -type f -name "coverage*.opencover.xml"
+
+      # -------------------
+      # SONARCLOUD END
+      # -------------------
       - name: SonarCloud - End
+        if: always()
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+          dotnet sonarscanner end \
+            /d:sonar.token="${SONAR_TOKEN}"
