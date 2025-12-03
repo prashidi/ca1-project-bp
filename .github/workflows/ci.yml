@@ -68,5 +68,6 @@ jobs:
         run: |
           dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
       
-      - name: Run Dependency Checker
-        uses: ./.github/workflows/depcheck.yml
+  dependency_check:
+    needs: ci-build-test-sonar
+    uses: ./.github/workflows/depcheck.yml
