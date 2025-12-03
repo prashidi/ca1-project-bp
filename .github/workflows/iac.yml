@@ -64,7 +64,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@main
-        
+
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
@@ -98,13 +98,4 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           slot-name: "staging"
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_STAGING }}
-          package: myapp
-
-      # DEPLOY CODE TO PRODUCTION
-      - name: Deploy code to Production
-        if: github.ref == 'refs/heads/main'
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: myapp
