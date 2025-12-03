@@ -29,7 +29,6 @@ jobs:
           dotnet tool install --global dotnet-sonarscanner
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
-      # --- SONAR BEGIN ---
       - name: SonarCloud - Begin
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -44,7 +43,6 @@ jobs:
             /d:sonar.test.exclusions="**/UnitTestBP/**,**/bpBddTests/**" \
             /d:sonar.dotnet.excludeTestProjects=true \
             /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/*.opencover.xml"
-      # --- END BEGIN ---
 
       - name: Build Solution
         run: dotnet build BPCalculator.sln --configuration Release
