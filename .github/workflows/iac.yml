@@ -15,6 +15,8 @@ on:
             required: true
         AZURE_SUBSCRIPTION_ID:
             required: true
+        AZURE_RESOURCE_GROUP:
+            required: true
 
 permissions:
   id-token: write
@@ -26,12 +28,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@main
-
-      - name: Debug Secrets
-        run: |
-          echo CLIENT: ${{ secrets.AZURE_CLIENT_ID }}
-          echo TENANT: ${{ secrets.AZURE_TENANT_ID }}
-          echo SUB: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Azure Login
         uses: azure/login@v2
