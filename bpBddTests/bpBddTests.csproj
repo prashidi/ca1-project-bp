@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="coverlet.msbuild" Version="6.0.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Gherkin" Version="37.0.0" />
     <PackageReference Include="LightBDD.Framework" Version="3.11.1" />
     <PackageReference Include="LightBDD.MsTest3" Version="3.11.1" />
