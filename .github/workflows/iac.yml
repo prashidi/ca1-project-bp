@@ -1,4 +1,4 @@
-name: BP - Build & Deploy
+name: BP - IAC & CODE DEPLOY
 
 env:
   AZURE_WEBAPP_NAME: bp-calculator-prashidi
@@ -9,14 +9,18 @@ on:
   workflow_dispatch:
   workflow_call:
     secrets:
-        AZURE_CLIENT_ID:
-            required: true
-        AZURE_TENANT_ID:
-            required: true
-        AZURE_SUBSCRIPTION_ID:
-            required: true
-        AZURE_RESOURCE_GROUP:
-            required: true
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+      AZURE_RESOURCE_GROUP:
+        required: true
+      AZURE_WEBAPP_PUBLISH_PROFILE_STAGING:
+        required: true
+      AZURE_WEBAPP_PUBLISH_PROFILE:
+        required: true
 
 permissions:
   id-token: write
@@ -47,3 +51,22 @@ jobs:
             appServiceName=${{ env.AZURE_WEBAPP_NAME }}
             location=northeurope
             environment=${{ github.ref == 'refs/heads/staging' && 'staging' || 'production' }}
+
+      # DEPLOY CODE TO STAGING SLOT
+      - name: Deploy code to Staging Slot
+        if: github.ref == 'refs/heads/staging'
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          slot-name: "staging"
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_STAGING }}
+          package: myapp
+
+      # DEPLOY CODE TO PRODUCTION
+      - name: Deploy code to Production
+        if: github.ref == 'refs/heads/main'
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: myapp
