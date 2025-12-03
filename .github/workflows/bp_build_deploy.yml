@@ -67,14 +67,12 @@ jobs:
         run: |
           echo "Running UNIT tests"
           dotnet test UnitTestBP/UnitTestBP.csproj \
-            --no-build \
             /p:CollectCoverage=true \
             /p:CoverletOutput=TestResults/coverage.unit. \
             /p:CoverletOutputFormat=opencover
 
           echo "Running BDD tests"
           dotnet test bpBddTests/bpBddTests.csproj \
-            --no-build \
             /p:CollectCoverage=true \
             /p:CoverletOutput=TestResults/coverage.acceptance. \
             /p:CoverletOutputFormat=opencover
