@@ -1,86 +1,80 @@
-name: BP - Build & Deploy
+name: BP - CI (Build, Unit Test, BDD, Code Quality)
 
 env:
-  AZURE_WEBAPP_NAME: bp-calculator-prashidi
-  AZURE_WEBAPP_PACKAGE_PATH: "."
   DOTNET_VERSION: "9"
 
 on:
-  # push:
-  #   branches: ["main"]
-  workflow_dispatch: # manually triggered
-
-permissions:
-  contents: read
+  push:
+    branches:
+      - main
+      - staging
+      - '**'
+  pull_request:
+    branches:
+      - main
+      - staging
 
 jobs:
-  build:
+  ci-build-test-sonar:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set up .NET Core
+      - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Set up dependency caching for faster builds
-        uses: actions/cache@v3
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
+      - name: Install SonarScanner for .NET
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
-      - name: Build for Release
-        run: dotnet build --configuration Release
+      - name: SonarCloud - Begin
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner begin \
+            /k:"prashidi_ca1-project-bp" \
+            /o:"prashidi" \
+            /d:sonar.login="${SONAR_TOKEN}" \
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage*.opencover.xml" \
+            /d:sonar.sources="." \
+            /d:sonar.tests="UnitTestBP,bpBddTests" \
+            /d:sonar.test.inclusions="UnitTestBP/**/*.cs,bpBddTests/**/*.cs" \
+            /d:sonar.exclusions="**/bin/**,**/obj/**"
 
-      - name: Run unit tests
-        run: dotnet test UnitTestBP/UnitTestBP.csproj --collect "Code coverage"
+      - name: Build Solution
+        run: dotnet build BPCalculator.sln --configuration Release
 
-      - name: Run BDD Tests
-        run: dotnet test bpBddTests/bpBddTests.csproj --collect "Code coverage"
+      - name: Run Tests with Coverage (Unit + Acceptance)
+        run: |
+          dotnet test UnitTestBP/UnitTestBP.csproj \
+            --collect:"XPlat Code Coverage" \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=TestResults/coverage.unit.
 
-      # - name: Setup k6
-      #   uses: grafana/setup-k6-action@v1
+          dotnet test bpBddTests/bpBddTests.csproj \
+            --collect:"XPlat Code Coverage" \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=TestResults/coverage.acceptance.
 
-      # - name: Run k6 Performance Test
-      #   uses: grafana/run-k6-action@v1
-      #   env:
-      #     K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
-      #     K6_CLOUD_PROJECT_ID: ${{ secrets.K6_CLOUD_PROJECT_ID }}
-      #   with:
-      #     path: k6tests/perf1.js
+      - name: Verify coverage files
+        run: |
+          echo "Listing TestResults folders:"
+          find . -type f -name "*.opencover.xml"
 
-      - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
-
-  deploy:
-    permissions:
-      contents: none
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: "Development"
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: .net-app
-
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+      # --- SONAR END ---
+      - name: SonarCloud - End
+        if: always()
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner end \
+            /d:sonar.login="${SONAR_TOKEN}"
