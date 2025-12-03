@@ -47,7 +47,7 @@ jobs:
       # ---- SONAR BEGIN ----
 
       - name: Build Release
-        run: dotnet build --configuration Release 
+        run: dotnet build BPCalculator.sln --configuration Release 
 
       - name: Test with coverage (unit + acceptance)
         run: |
