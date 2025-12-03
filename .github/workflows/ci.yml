@@ -55,9 +55,6 @@ jobs:
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput=TestResults/coverage.
-
-          # Optional: show what got generated (handy when debugging 0% coverage)
-          ls -R
       
       # ---- SONAR END ----
       - name: SonarQube - End analysis
