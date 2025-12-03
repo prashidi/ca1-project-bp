@@ -86,4 +86,4 @@ jobs:
 
   e2e:
     needs: k6
-    uses: ./.github/workflows/e2e.yml
+    uses: ./.github/workflows/playwright.yml
