@@ -8,11 +8,7 @@ on:
     branches:
       - main
       - staging
-      - '**'
   pull_request:
-    branches:
-      - main
-      - staging
 
 jobs:
   ci-build-test-sonar:
@@ -32,7 +28,6 @@ jobs:
         run: |
           dotnet tool install --global dotnet-sonarscanner
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-
       - name: SonarCloud - Begin
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -40,12 +35,11 @@ jobs:
           dotnet sonarscanner begin \
             /k:"prashidi_ca1-project-bp" \
             /o:"prashidi" \
-            /d:sonar.login="${SONAR_TOKEN}" \
+            /d:sonar.token="${SONAR_TOKEN}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage*.opencover.xml" \
-            /d:sonar.sources="." \
-            /d:sonar.tests="UnitTestBP,bpBddTests" \
-            /d:sonar.test.inclusions="UnitTestBP/**/*.cs,bpBddTests/**/*.cs" \
-            /d:sonar.exclusions="**/bin/**,**/obj/**"
+            /d:sonar.coverage.inclusions="**/BloodPressure.cs" \
+            /d:sonar.coverage.exclusions="**/*.cshtml.cs, **/Program.cs, **/Startup.cs, **/k6tests/**, **/*.js"
 
       - name: Build Solution
         run: dotnet build BPCalculator.sln --configuration Release
@@ -53,28 +47,22 @@ jobs:
       - name: Run Tests with Coverage (Unit + Acceptance)
         run: |
           dotnet test UnitTestBP/UnitTestBP.csproj \
-            --collect:"XPlat Code Coverage" \
+            --configuration Release \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput=TestResults/coverage.unit.
-
+          
           dotnet test bpBddTests/bpBddTests.csproj \
-            --collect:"XPlat Code Coverage" \
+            --configuration Release \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput=TestResults/coverage.acceptance.
-
-      - name: Verify coverage files
-        run: |
-          echo "Listing TestResults folders:"
-          find . -type f -name "*.opencover.xml"
-
-
+      
+      - name: Find path
+        run: find . -type f -name "coverage*.opencover.xml"
       # --- SONAR END ---
       - name: SonarCloud - End
-        if: always()
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          dotnet sonarscanner end \
-            /d:sonar.login="${SONAR_TOKEN}"
+          dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
