@@ -52,13 +52,15 @@ jobs:
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput=TestResults/coverage.unit.
+          
           dotnet test bpBddTests/bpBddTests.csproj \
             --configuration Release \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput=TestResults/coverage.acceptance.
-
-          find . -type f -name "coverage*.opencover.xml"
+      
+      - name: Find path
+        run: find . -type f -name "coverage*.opencover.xml"
       # --- SONAR END ---
       - name: SonarCloud - End
         env:
