@@ -5,33 +5,33 @@ env:
 
 on:
   push:
-    branches:
-      - main
-      - staging
-      - '**'
+    branches: [ main, staging ]
   pull_request:
-    branches:
-      - main
-      - staging
+    branches: [ main, staging ]
 
 jobs:
   ci-build-test-sonar:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up .NET
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Install SonarScanner for .NET
+      - name: Install SonarScanner
         run: |
           dotnet tool install --global dotnet-sonarscanner
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      # IMPORTANT: Build BEFORE Sonar Begin
+      - name: Build (preparation for Sonar)
+        run: dotnet build BPCalculator.sln --configuration Release
 
       - name: SonarCloud - Begin
         env:
@@ -41,40 +41,33 @@ jobs:
             /k:"prashidi_ca1-project-bp" \
             /o:"prashidi" \
             /d:sonar.login="${SONAR_TOKEN}" \
-            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage*.opencover.xml" \
-            /d:sonar.sources="." \
-            /d:sonar.tests="UnitTestBP,bpBddTests" \
-            /d:sonar.test.inclusions="UnitTestBP/**/*.cs,bpBddTests/**/*.cs" \
-            /d:sonar.exclusions="**/bin/**,**/obj/**"
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage*.opencover.xml"
 
-      - name: Build Solution
+      # Build again (required by Sonar)
+      - name: Build for analysis
         run: dotnet build BPCalculator.sln --configuration Release
 
-      - name: Run Tests with Coverage (Unit + Acceptance)
+      - name: Run Unit Tests with Coverage
         run: |
+          mkdir -p UnitTestBP/TestResults
           dotnet test UnitTestBP/UnitTestBP.csproj \
-            --collect:"XPlat Code Coverage" \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=TestResults/coverage.unit.
+            /p:CoverletOutput=UnitTestBP/TestResults/coverage.unit.
 
-          dotnet test bpBddTests/bpBddTests.csproj \
-            --collect:"XPlat Code Coverage" \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=TestResults/coverage.acceptance.
-
-      - name: Verify coverage files
+      - name: Run Acceptance Tests with Coverage
         run: |
-          echo "Listing TestResults folders:"
-          find . -type f -name "*.opencover.xml"
+          mkdir -p bpBddTests/TestResults
+          dotnet test bpBddTests/bpBddTests.csproj \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=bpBddTests/TestResults/coverage.acceptance.
 
+      - name: Verify Coverage Files
+        run: find . -name "*.opencover.xml"
 
-      # --- SONAR END ---
       - name: SonarCloud - End
         if: always()
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          dotnet sonarscanner end \
-            /d:sonar.login="${SONAR_TOKEN}"
+        run: dotnet sonarscanner end /d:sonar.login="${SONAR_TOKEN}"
