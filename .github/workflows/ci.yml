@@ -53,14 +53,12 @@ jobs:
         run: |
           # Unit tests
           dotnet test UnitTestBP/UnitTestBP.csproj \
-            --no-build \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput=TestResults/coverage.unit.
 
           # Acceptance tests
           dotnet test bpBddTests/bpBddTests.csproj \
-            --no-build \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput=TestResults/coverage.acceptance.
