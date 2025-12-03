@@ -5,7 +5,12 @@ env:
 on:
   workflow_dispatch:
   workflow_call:
-  
+    secrets:
+      K6_CLOUD_TOKEN:
+        required: true
+      K6_CLOUD_PROJECT_ID:
+        required: true
+
 jobs:
   k6_load_test:
     runs-on: ubuntu-latest

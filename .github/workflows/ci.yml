@@ -84,7 +84,7 @@ jobs:
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
-  
+
   zap:
     needs: deploy_iac
     uses: ./.github/workflows/zap.yml
@@ -92,6 +92,9 @@ jobs:
   k6:
     needs: zap
     uses: ./.github/workflows/k6.yml
+    secrets:
+      K6_CLOUD_TOKEN: ${{secrets.K6_CLOUD_TOKEN}}
+      K6_CLOUD_PROJECT_ID: ${{secrets.K6_CLOUD_PROJECT_ID}}
 
   e2e:
     needs: k6
