@@ -11,7 +11,7 @@ on:
   pull_request:
 
 jobs:
-  ci:
+  ci-build-test-sonar:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,36 +24,80 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Install SonarScanner for .NET
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
       - name: Restore
         run: dotnet restore
-
-      - name: Build Release
-        run: dotnet build --configuration Release
-
-      - name: Run tests with Coverage
-        run: dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults
-
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool
-
-      - name: Convert Cobertura to OpenCover
-        run: |
-          mkdir -p coveragereport
-          reportgenerator \
-            -reports:"TestResults/**/coverage.cobertura.xml" \
-            -targetdir:"coveragereport" \
-            -reporttypes:OpenCover \
-            -sourcepath:"." \
-            -relative_paths:true
-
-      - name: SonarCloud Scan - Staging
-        uses: sonarsource/sonarcloud-github-action@master
+      
+      # ---- SONAR BEGIN ----
+      - name: SonarQube - Begin analysis
         env:
           SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
-        with:
-          projectBaseDir: .
-          args: >
-            -Dsonar.organization=prashidi
-            -Dsonar.projectKey=prashidi_ca1-project-bp
-            -Dsonar.cs.opencover.reportsPaths=coveragereport/coverage.opencover.xml
-            -Dsonar.verbose=true
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          dotnet sonarscanner begin \
+            /k:"prashidi_ca1-project-bp" \
+            /d:sonar.host.url="$SONAR_HOST_URL" \
+            /d:sonar.token="$SONAR_TOKEN" \
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage*.opencover.xml"
+      # ---- SONAR BEGIN ----
+
+      - name: Build Release
+        run: dotnet build --configuration Release --no-incremental
+
+      - name: Test with coverage (unit + acceptance)
+        run: |
+          # Unit tests
+          dotnet test UnitTestBP/UnitTestBP.csproj \
+            --no-build \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=TestResults/coverage.unit.
+
+          # Acceptance tests
+          dotnet test bpBddTests/bpBddTests.csproj \
+            --no-build \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=TestResults/coverage.acceptance.
+
+          # Optional: show what got generated (handy when debugging 0% coverage)
+          ls -R
+      
+      # ---- SONAR END ----
+      - name: SonarQube - End analysis
+        if: always()
+        env:
+          SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+      # ---- SONAR END ----
+
+      # - name: Install ReportGenerator
+      #   run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      # - name: Convert Cobertura to OpenCover
+      #   run: |
+      #     mkdir -p coveragereport
+      #     reportgenerator \
+      #       -reports:"TestResults/**/coverage.cobertura.xml" \
+      #       -targetdir:"coveragereport" \
+      #       -reporttypes:OpenCover \
+      #       -sourcepath:"." \
+      #       -relative_paths:true
+
+      # - name: SonarCloud Scan - Staging
+      #   uses: sonarsource/sonarcloud-github-action@master
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
+      #   with:
+      #     projectBaseDir: .
+      #     args: >
+      #       -Dsonar.organization=prashidi
+      #       -Dsonar.projectKey=prashidi_ca1-project-bp
+      #       -Dsonar.cs.opencover.reportsPaths=coveragereport/coverage.opencover.xml
+      #       -Dsonar.verbose=true
