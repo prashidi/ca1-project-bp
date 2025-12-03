@@ -71,3 +71,19 @@ jobs:
   dependency_check:
     needs: ci-build-test-sonar
     uses: ./.github/workflows/depcheck.yml
+  
+  zap:
+    needs: dependency_check
+    uses: ./.github/workflows/zap.yml
+  
+  deploy_iac:
+    needs: zap
+    uses: ./.github/workflows/iac.yml
+  
+  k6:
+    needs: deploy_iac
+    uses: ./.github/workflows/k6.yml
+  
+  e2e:
+    needs: k6
+    uses: ./.github/workflows/e2e.yml
