@@ -51,17 +51,10 @@ jobs:
 
       - name: Test with coverage (unit + acceptance)
         run: |
-          # Unit tests
           dotnet test BPCalculator.sln \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=TestResults/coverage.unit.
-
-          # Acceptance tests
-          dotnet test bpBddTests/bpBddTests.csproj \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=TestResults/coverage.acceptance.
+            /p:CoverletOutput=TestResults/coverage.
 
           # Optional: show what got generated (handy when debugging 0% coverage)
           ls -R
