@@ -4,7 +4,8 @@ env:
   BASE_URL: "https://bp-calculator-prashidi-staging-euaec9evcje4fhcd.northeurope-01.azurewebsites.net"
 
 on:
-  workflow_call
+  workflow_dispatch:
+  workflow_call:
 
 jobs:
   test:
