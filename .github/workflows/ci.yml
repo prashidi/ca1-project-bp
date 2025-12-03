@@ -65,28 +65,3 @@ jobs:
         run: |
           dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
       # ---- SONAR END ----
-
-      # - name: Install ReportGenerator
-      #   run: dotnet tool install --global dotnet-reportgenerator-globaltool
-
-      # - name: Convert Cobertura to OpenCover
-      #   run: |
-      #     mkdir -p coveragereport
-      #     reportgenerator \
-      #       -reports:"TestResults/**/coverage.cobertura.xml" \
-      #       -targetdir:"coveragereport" \
-      #       -reporttypes:OpenCover \
-      #       -sourcepath:"." \
-      #       -relative_paths:true
-
-      # - name: SonarCloud Scan - Staging
-      #   uses: sonarsource/sonarcloud-github-action@master
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
-      #   with:
-      #     projectBaseDir: .
-      #     args: >
-      #       -Dsonar.organization=prashidi
-      #       -Dsonar.projectKey=prashidi_ca1-project-bp
-      #       -Dsonar.cs.opencover.reportsPaths=coveragereport/coverage.opencover.xml
-      #       -Dsonar.verbose=true
