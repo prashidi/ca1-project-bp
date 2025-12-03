@@ -35,13 +35,13 @@ jobs:
           dotnet sonarscanner begin \
             /k:"prashidi_ca1-project-bp" \
             /o:"prashidi" \
-            /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.token="$SONAR_TOKEN" \
+            /d:sonar.login="${SONAR_TOKEN}" \
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage*.opencover.xml" \
             /d:sonar.sources="." \
-            /d:sonar.exclusions="**/bin/**,**/obj/**" \
-            /d:sonar.test.exclusions="**/UnitTestBP/**,**/bpBddTests/**" \
-            /d:sonar.dotnet.excludeTestProjects=true \
-            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/*.opencover.xml"
+            /d:sonar.tests="UnitTestBP,bpBddTests" \
+            /d:sonar.test.inclusions="UnitTestBP/**/*.cs,bpBddTests/**/*.cs" \
+            /d:sonar.exclusions="**/bin/**,**/obj/**"
+            
       - name: Build Solution
         run: dotnet build BPCalculator.sln --configuration Release
 
