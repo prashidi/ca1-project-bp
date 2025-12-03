@@ -52,13 +52,13 @@ jobs:
       - name: Test with coverage (unit + acceptance)
         run: |
           # Unit tests
-          dotnet test tests/Your.UnitTests/Your.UnitTests.csproj \
+          dotnet test UnitTestBP/UnitTestBP.csproj \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput=TestResults/coverage.unit.
 
           # Acceptance tests
-          dotnet test tests/Your.AcceptanceTests/Your.AcceptanceTests.csproj \
+          dotnet test bpBddTests/bpBddTests.csproj \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput=TestResults/coverage.acceptance.
