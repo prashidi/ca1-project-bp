@@ -29,39 +29,43 @@ jobs:
           dotnet tool install --global dotnet-sonarscanner
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
-      - name: Restore
-        run: dotnet restore
-      
-      # ---- SONAR BEGIN ----
-      - name: SonarQube - Begin analysis
+      # --- SONAR BEGIN ---
+      - name: SonarCloud - Begin
         env:
           SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           dotnet sonarscanner begin \
-            /o:"prashidi" \
             /k:"prashidi_ca1-project-bp" \
-            /d:sonar.host.url="$SONAR_HOST_URL" \
+            /o:"prashidi" \
+            /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.token="$SONAR_TOKEN" \
-            /d:sonar.cs.opencover.reportsPaths="**/*.opencover.xml"
-      # ---- SONAR BEGIN ----
+            /d:sonar.sources="." \
+            /d:sonar.exclusions="**/bin/**,**/obj/**" \
+            /d:sonar.test.exclusions="**/UnitTestBP/**,**/bpBddTests/**" \
+            /d:sonar.dotnet.excludeTestProjects=true \
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/*.opencover.xml"
+      # --- END BEGIN ---
 
-      - name: Build Release
-        run: dotnet build BPCalculator.sln --configuration Release 
+      - name: Build Solution
+        run: dotnet build BPCalculator.sln --configuration Release
 
-      - name: Test with coverage (unit + acceptance)
+      - name: Run Tests with Coverage (Unit + Acceptance)
         run: |
-          dotnet test BPCalculator.sln \
+          dotnet test UnitTestBP/UnitTestBP.csproj \
+            --configuration Release \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=TestResults/coverage.
-      
-      # ---- SONAR END ----
-      - name: SonarQube - End analysis
-        if: always()
+            /p:CoverletOutput=TestResults/coverage.unit.
+
+          dotnet test bpBddTests/bpBddTests.csproj \
+            --configuration Release \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=TestResults/coverage.acceptance.
+
+      # --- SONAR END ---
+      - name: SonarCloud - End
         env:
           SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
-      # ---- SONAR END ----
