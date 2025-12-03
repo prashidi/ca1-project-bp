@@ -1,96 +1,74 @@
-name: BP - CI (Build, Test, Coverage, Sonar)
+name: Build, Tests & SonarQube
 
 env:
   DOTNET_VERSION: "9"
 
 on:
   push:
-    branches: [main, staging]
-  pull_request:
-    branches: [main, staging]
+    branches:
+      - main
+      - staging
 
 jobs:
   build-test-sonar:
     runs-on: ubuntu-latest
 
     steps:
-      # -------------------
-      # CHECKOUT
-      # -------------------
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0   # Sonar likes full history for some features
 
-      # -------------------
-      # .NET SETUP
-      # -------------------
-      - name: Set up .NET
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # -------------------
-      # INSTALL SONARSCANNER
-      # -------------------
       - name: Install SonarScanner for .NET
         run: |
           dotnet tool install --global dotnet-sonarscanner
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
-      # -------------------
-      # SONARCLOUD BEGIN
-      # -------------------
-      - name: SonarCloud - Begin
+      - name: Restore
+        run: dotnet restore
+
+      # ---- SONAR BEGIN ----
+      - name: SonarQube - Begin analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           dotnet sonarscanner begin \
-            /k:"prashidi_ca1-project-bp" \
             /o:"prashidi" \
-            /d:sonar.projectBaseDir="${GITHUB_WORKSPACE}" \
-            /d:sonar.token="${SONAR_TOKEN}" \
-            /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.opencover.reportsPaths="*/TestResults//coverage*.opencover.xml"
+            /k:"prashidi_ca1-project-bp" \
+            /d:sonar.host.url="$SONAR_HOST_URL" \
+            /d:sonar.token="$SONAR_TOKEN" \
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage*.opencover.xml"
+      # ---- SONAR BEGIN ----
 
-      # -------------------
-      # BUILD SOLUTION
-      # -------------------
-      - name: Build Solution
-        run: dotnet build BPCalculator.sln --configuration Release
+      - name: Build
+        run: dotnet build --no-incremental
 
-      # -------------------
-      # RUN TESTS WITH COVERAGE
-      # -------------------
-      - name: Run Tests with Coverage (Unit + BDD)
+      - name: Test with coverage (unit + acceptance)
         run: |
-          echo "Running UNIT tests"
-          dotnet test UnitTestBP/UnitTestBP.csproj \
+          # Unit tests
+          dotnet test tests/Your.UnitTests/Your.UnitTests.csproj \
             /p:CollectCoverage=true \
-            /p:CoverletOutput=TestResults/coverage.unit. \
-            /p:CoverletOutputFormat=opencover
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=TestResults/coverage.unit.
 
-          echo "Running BDD tests"
-          dotnet test bpBddTests/bpBddTests.csproj \
+          # Acceptance tests
+          dotnet test tests/Your.AcceptanceTests/Your.AcceptanceTests.csproj \
             /p:CollectCoverage=true \
-            /p:CoverletOutput=TestResults/coverage.acceptance. \
-            /p:CoverletOutputFormat=opencover
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=TestResults/coverage.acceptance.
 
-      # -------------------
-      # VERIFY COVERAGE FILES
-      # -------------------
-      - name: Verify Coverage Files
-        run: |
-          echo "Coverage files found:"
-          find . -type f -name "coverage*.opencover.xml"
-
-      # -------------------
-      # SONARCLOUD END
-      # -------------------
-      - name: SonarCloud - End
+      # ---- SONAR END ----
+      - name: SonarQube - End analysis
         if: always()
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
-          dotnet sonarscanner end \
-            /d:sonar.token="${SONAR_TOKEN}"
+          dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+      # ---- SONAR END ----
