@@ -1,4 +1,4 @@
-name: BP - IAC & CODE DEPLOY
+name: BP - IaC & Code Deploy
 
 env:
   AZURE_WEBAPP_NAME: bp-calculator-prashidi
@@ -64,6 +64,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@main
+        
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+          path: myapp
 
       - name: Azure Login
         uses: azure/login@v2
