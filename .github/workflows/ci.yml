@@ -35,7 +35,7 @@ jobs:
           dotnet tool install --global dotnet-sonarscanner
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
-      - name: SonarCloud - Begin
+      - name: SonarCloud - Begin (PR Analysis)
         if: github.event_name == 'pull_request'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -51,6 +51,20 @@ jobs:
             /d:sonar.pullrequest.key="${{ github.event.pull_request.number }}" \
             /d:sonar.pullrequest.branch="${{ github.head_ref }}" \
             /d:sonar.pullrequest.base="${{ github.base_ref }}"
+      
+      - name: SonarCloud - Begin (Branch Analysis)
+        if: github.event_name == 'push'
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner begin \
+            /k:"prashidi_ca1-project-bp" \
+            /o:"prashidi" \
+            /d:sonar.token="${SONAR_TOKEN}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage*.opencover.xml" \
+            /d:sonar.coverage.inclusions="**/BloodPressure.cs" \
+            /d:sonar.coverage.exclusions="**/*.cshtml.cs, **/Program.cs, **/Startup.cs, **/k6tests/**, **/*.js"
 
       - name: Build Solution
         run: dotnet build BPCalculator.sln --configuration Release
@@ -74,7 +88,7 @@ jobs:
       # --- SONAR END ---
 
       - name: SonarCloud - End
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
