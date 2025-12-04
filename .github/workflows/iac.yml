@@ -71,6 +71,12 @@ jobs:
           name: .net-app
           path: myapp
 
+      - name: check AZURE_CLIENT_ID_PR
+        run: echo ${{ secrets.AZURE_CLIENT_ID_PR }}
+      
+      - name: check AZURE_TENANT_ID_PR
+        run: echo ${{ secrets.AZURE_TENANT_ID_PR }}
+
       - name: Azure Login (Push)
         if: github.event_name == 'push'
         uses: azure/login@v2
