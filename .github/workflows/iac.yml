@@ -79,7 +79,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       
-      - name: Azure Login
+      - name: Azure Login (PR)
         if: github.event_name == 'pull_request'
         uses: azure/login@v2
         with:
