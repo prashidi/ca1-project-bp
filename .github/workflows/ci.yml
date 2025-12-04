@@ -2,6 +2,7 @@ name: BP - CI (Build, Unit Test, BDD, Code Quality)
 
 env:
   DOTNET_VERSION: "9"
+  PR_BRANCH: ${{ github.head_ref }}
 
 on:
   push:
@@ -49,7 +50,7 @@ jobs:
             /d:sonar.coverage.inclusions="**/BloodPressure.cs" \
             /d:sonar.coverage.exclusions="**/*.cshtml.cs, **/Program.cs, **/Startup.cs, **/k6tests/**, **/*.js" \
             /d:sonar.pullrequest.key="${{ github.event.pull_request.number }}" \
-            /d:sonar.pullrequest.branch="${{ github.head_ref }}" \
+            /d:sonar.pullrequest.branch="${{ env.PR_BRANCH }}" \
             /d:sonar.pullrequest.base="${{ github.base_ref }}"
       
       - name: SonarCloud - Begin (Branch Analysis)
