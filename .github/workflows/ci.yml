@@ -34,7 +34,9 @@ jobs:
         run: |
           dotnet tool install --global dotnet-sonarscanner
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
       - name: SonarCloud - Begin
+        if: github.event_name == 'pull_request'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
@@ -72,6 +74,7 @@ jobs:
       # --- SONAR END ---
 
       - name: SonarCloud - End
+        if: github.event_name == 'pull_request'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
