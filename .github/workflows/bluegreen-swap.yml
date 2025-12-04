@@ -1,7 +1,7 @@
 name: BP - BlueGreen Slot Swap
 
 on:
-  workflow_dispatch:   # run manually after you’re happy with staging
+  workflow_dispatch:   # run manually 
 
 permissions:
   id-token: write
