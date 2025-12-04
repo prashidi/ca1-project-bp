@@ -45,6 +45,9 @@ jobs:
             /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage*.opencover.xml" \
             /d:sonar.coverage.inclusions="**/BloodPressure.cs" \
             /d:sonar.coverage.exclusions="**/*.cshtml.cs, **/Program.cs, **/Startup.cs, **/k6tests/**, **/*.js"
+            /d:sonar.pullrequest.key="${{ github.event.pull_request.number }}" \
+            /d:sonar.pullrequest.branch="${{ github.head_ref }}" \
+            /d:sonar.pullrequest.base="${{ github.base_ref }}"
 
       - name: Build Solution
         run: dotnet build BPCalculator.sln --configuration Release
