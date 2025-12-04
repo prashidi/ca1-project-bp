@@ -40,16 +40,9 @@ resource app 'Microsoft.Web/sites@2022-03-01' = {
     serverFarmId: appServicePlan.id
     httpsOnly: true
 
-    // SonarQube security fixes
-    clientCertEnabled: false
-
     siteConfig: {
       netFrameworkVersion: 'v8.0'
       alwaysOn: true
-
-      // SonarQube security fixes
-      minTlsVersion: '1.2'
-      ftpsState: 'Disabled'
 
       appSettings: [
         {
@@ -76,10 +69,6 @@ resource stagingSlot 'Microsoft.Web/sites/slots@2022-03-01' = if (environment ==
   properties: {
     serverFarmId: appServicePlan.id
     httpsOnly: true
-
-    // 🔐 SonarQube security fixes
-      clientCertEnabled: false
-      
     siteConfig: {
       netFrameworkVersion: 'v8.0'
       alwaysOn: false
