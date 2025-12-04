@@ -10,6 +10,7 @@ on:
       - staging
       - "**"
   pull_request:
+    types: [opened, synchronize, reopened]
 
 permissions:
   id-token: write
