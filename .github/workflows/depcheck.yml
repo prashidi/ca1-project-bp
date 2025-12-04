@@ -4,7 +4,9 @@
 name: BP - OWASP Dependency Checker       
   
 on:
-  workflow_dispatch:                  # manually triggered
+  workflow_dispatch:
+  workflow_call:
+
 
 jobs:
   dependency_check:
@@ -29,3 +31,4 @@ jobs:
         with:
            name: Depcheck report
            path: ${{github.workspace}}/reports
+      

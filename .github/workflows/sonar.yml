@@ -3,7 +3,12 @@
 name: BP - SonarCloud
 
 on:
+<<<<<<< HEAD
   workflow_dispatch:
+=======
+ workflow_dispatch:
+ workflow_call:
+>>>>>>> staging
 
 jobs:
   scan_code:
@@ -14,6 +19,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+<<<<<<< HEAD
 
       # 2. Setup .NET
       - name: Setup .NET
@@ -49,6 +55,8 @@ jobs:
             -relative_paths:true
 
       # 7. SonarCloud Scan with coverage path
+=======
+>>>>>>> staging
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
@@ -58,5 +66,10 @@ jobs:
           args: >
             -Dsonar.organization=prashidi
             -Dsonar.projectKey=prashidi_ca1-project-bp
+<<<<<<< HEAD
             -Dsonar.cs.opencover.reportsPaths=coveragereport/coverage.opencover.xml
             -Dsonar.verbose=true
+=======
+        env:
+          SONAR_TOKEN: ${{ secrets.BP_TOKEN }}
+>>>>>>> staging

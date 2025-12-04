@@ -1,6 +1,12 @@
 name: BP - e2e Tests
+
+env:
+  BASE_URL: "https://bp-calculator-prashidi-staging-euaec9evcje4fhcd.northeurope-01.azurewebsites.net"
+
 on:
   workflow_dispatch:
+  workflow_call:
+
 jobs:
   test:
     timeout-minutes: 60

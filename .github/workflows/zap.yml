@@ -5,10 +5,11 @@
 name: BP - ZAP
 
 env:
-  URI: https://bp-calculator-prashidi-dggsdtf3fhd6b2hd.northeurope-01.azurewebsites.net          
+  URI: https://bp-calculator-prashidi-staging-euaec9evcje4fhcd.northeurope-01.azurewebsites.net          
   
 on:
-  workflow_dispatch:                  # manually triggered
+  workflow_dispatch:
+  workflow_call:
 
 jobs:
 

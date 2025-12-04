@@ -1,0 +1,40 @@
+name: BP - BlueGreen Slot Swap
+
+on:
+  workflow_dispatch:   # run manually after you’re happy with staging
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_WEBAPP_NAME: bp-calculator-prashidi
+  AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+
+jobs:
+  swap_slots:
+    runs-on: ubuntu-latest
+
+    # This hooks into the "production" environment we created
+    environment:
+      name: production
+      url: https://bp-calculator-prashidi-dggsdtf3fhd6b2hd.northeurope-01.azurewebsites.net/
+
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Swap staging → production
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            echo "Swapping slots: staging → production..."
+            az webapp deployment slot swap \
+              --resource-group $AZURE_RESOURCE_GROUP \
+              --name $AZURE_WEBAPP_NAME \
+              --slot staging \
+              --target-slot production

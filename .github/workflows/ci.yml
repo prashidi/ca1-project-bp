@@ -1,0 +1,103 @@
+name: BP - CI (Build, Unit Test, BDD, Code Quality)
+
+env:
+  DOTNET_VERSION: "9"
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  ci-build-test-sonar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install SonarScanner for .NET
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+      - name: SonarCloud - Begin
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner begin \
+            /k:"prashidi_ca1-project-bp" \
+            /o:"prashidi" \
+            /d:sonar.token="${SONAR_TOKEN}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage*.opencover.xml" \
+            /d:sonar.coverage.inclusions="**/BloodPressure.cs" \
+            /d:sonar.coverage.exclusions="**/*.cshtml.cs, **/Program.cs, **/Startup.cs, **/k6tests/**, **/*.js"
+
+      - name: Build Solution
+        run: dotnet build BPCalculator.sln --configuration Release
+
+      - name: Run Tests with Coverage (Unit + Acceptance)
+        run: |
+          dotnet test UnitTestBP/UnitTestBP.csproj \
+            --configuration Release \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=TestResults/coverage.unit.
+
+          dotnet test bpBddTests/bpBddTests.csproj \
+            --configuration Release \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=TestResults/coverage.acceptance.
+
+      - name: Find path
+        run: find . -type f -name "coverage*.opencover.xml"
+      # --- SONAR END ---
+
+      - name: SonarCloud - End
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
+
+  dependency_check:
+    needs: ci-build-test-sonar
+    uses: ./.github/workflows/depcheck.yml
+
+  deploy_iac:
+    needs: dependency_check
+    uses: ./.github/workflows/iac.yml
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+      AZURE_WEBAPP_PUBLISH_PROFILE_STAGING: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_STAGING }}
+      AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+
+  zap:
+    needs: deploy_iac
+    uses: ./.github/workflows/zap.yml
+
+  k6:
+    needs: zap
+    uses: ./.github/workflows/k6.yml
+    secrets:
+      K6_CLOUD_TOKEN: ${{secrets.K6_CLOUD_TOKEN}}
+      K6_CLOUD_PROJECT_ID: ${{secrets.K6_CLOUD_PROJECT_ID}}
+
+  e2e:
+    needs: k6
+    uses: ./.github/workflows/playwright.yml

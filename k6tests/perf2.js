@@ -1,6 +1,9 @@
 import { check, sleep } from "k6";
 import http from "k6/http";
 
+const BASE_URL =
+  "https://bp-calculator-prashidi-staging-euaec9evcje4fhcd.northeurope-01.azurewebsites.net";
+
 // Export an options object to configure how k6 will behave during test execution.
 //
 export let options = {
@@ -22,7 +25,7 @@ export let options = {
   cloud: {
     name: "BP Load Test",
     distribution: {
-      distributionLabel1: { loadZone: "amazon:ie:dublin", percent: 100 },
+      distributionLabel2: { loadZone: "amazon:ie:dublin", percent: 100 },
     },
   },
 };
@@ -34,9 +37,6 @@ export let options = {
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
-
-const BASE_URL =
-  "https://bp-calculator-prashidi-dggsdtf3fhd6b2hd.northeurope-01.azurewebsites.net";
 
 // Default VU function — entry point
 export default function () {
