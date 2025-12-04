@@ -13,6 +13,10 @@ on:
         required: true
       AZURE_TENANT_ID:
         required: true
+      AZURE_CLIENT_ID_PR:
+        required: true 
+      AZURE_TENANT_ID_PR:
+        required: true 
       AZURE_SUBSCRIPTION_ID:
         required: true
       AZURE_RESOURCE_GROUP:
@@ -70,12 +74,6 @@ jobs:
         with:
           name: .net-app
           path: myapp
-
-      - name: check AZURE_CLIENT_ID_PR
-        run: echo ${{ secrets.AZURE_CLIENT_ID_PR }}
-      
-      - name: check AZURE_TENANT_ID_PR
-        run: echo ${{ secrets.AZURE_TENANT_ID_PR }}
 
       - name: Azure Login (Push)
         if: github.event_name == 'push'
