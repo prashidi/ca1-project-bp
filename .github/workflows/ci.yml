@@ -6,7 +6,6 @@ env:
 on:
   push:
     branches:
-      - main
       - staging
   pull_request:
 
@@ -41,6 +40,7 @@ jobs:
             /o:"prashidi" \
             /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.branch.name=staging
             /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage*.opencover.xml" \
             /d:sonar.coverage.inclusions="**/BloodPressure.cs" \
             /d:sonar.coverage.exclusions="**/*.cshtml.cs, **/Program.cs, **/Startup.cs, **/k6tests/**, **/*.js"
