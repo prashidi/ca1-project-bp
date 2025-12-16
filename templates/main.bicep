@@ -10,9 +10,6 @@ param environment string = 'production'
 @description('App Service Plan name')
 param appServicePlanName string = '${appServiceName}-plan'
 
-@description('App Service Plan SKU')
-param sku string = 'S1'
-
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' existing = {
   name: appServicePlanName
 }
