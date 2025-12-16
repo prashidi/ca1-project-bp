@@ -101,7 +101,7 @@ jobs:
           parameters: >
             appServiceName=${{ env.AZURE_WEBAPP_NAME }}
             location=northeurope
-            environment=${{ github.ref == 'refs/heads/staging' && 'staging' || 'production' }}
+            environment=${{ github.ref == 'refs/heads/release-0' && 'release-0' || 'production' }}
 
       # DEPLOY CODE TO STAGING SLOT
       - name: Deploy code to Staging Slot
