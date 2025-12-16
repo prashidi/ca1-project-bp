@@ -29,7 +29,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID_PROD }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Swap staging → production
+      - name: Swap release-0 → production
         uses: azure/cli@v2
         with:
           inlineScript: |

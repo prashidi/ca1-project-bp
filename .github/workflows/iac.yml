@@ -105,7 +105,7 @@ jobs:
 
       # DEPLOY CODE TO STAGING SLOT
       - name: Deploy code to Staging Slot
-        if: github.ref == 'refs/heads/staging'
+        if: github.ref == 'refs/heads/release-0'
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
