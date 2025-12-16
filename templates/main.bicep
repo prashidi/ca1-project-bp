@@ -13,15 +13,8 @@ param appServicePlanName string = '${appServiceName}-plan'
 @description('App Service Plan SKU')
 param sku string = 'S1'
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
+resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' existing = {
   name: appServicePlanName
-  location: location
-  sku: {
-    name: ' B1'
-    tier: 'Basic'
-    size: sku
-    capacity: 1
-  }
 }
 
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
