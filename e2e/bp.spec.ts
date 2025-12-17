@@ -64,7 +64,7 @@ test.describe("Blood Pressure Calculator - E2E Tests", () => {
 
     await page.getByRole("button", { name: "Submit" }).click();
 
-    await expect(page.locator("#bpEmergency"))
+    await expect(page.locator("#bpNoEmergency"))
         .toContainText("No emergency indicators detected");
 });
 });
