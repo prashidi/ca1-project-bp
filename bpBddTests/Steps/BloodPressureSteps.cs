@@ -2,7 +2,6 @@ using BPCalculator;
 using LightBDD.Framework;
 using LightBDD.Framework.Scenarios;
 using LightBDD.MsTest3;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace bpBddTests.Steps
 {
@@ -114,6 +113,30 @@ namespace bpBddTests.Steps
             bp.Systolic = value;
         }
 
+        [Scenario]
+        [Label("Not emergency")]
+        public void Emergency_systolic_detected()
+        {
+            Runner.RunScenario(
+                _ => Given_a_systolic_pressure_of(185),
+                _ => And_a_diastolic_pressure_of(90),
+                _ => When_I_calculate_the_blood_pressure(),
+                _ => Then_emergency_status_should_be(true)
+            );
+        }
+
+        [Scenario]
+        [Label("Detect emergency systolic")]
+        public void Emergency_not_detected_for_normal_values()
+        {
+            Runner.RunScenario(
+                _ => Given_a_systolic_pressure_of(120),
+                _ => And_a_diastolic_pressure_of(80),
+                _ => When_I_calculate_the_blood_pressure(),
+                _ => Then_emergency_status_should_be(false)
+            );
+        }
+
         private void And_a_diastolic_pressure_of(int value)
 
         {
@@ -128,6 +151,11 @@ namespace bpBddTests.Steps
         private void Then_the_result_should_be(string expected)
         {
             Assert.AreEqual(expected, result);
+        }
+
+        public void Then_emergency_status_should_be(bool expected)
+        {
+            Assert.AreEqual(expected, bp.IsEmergency);
         }
 
     }

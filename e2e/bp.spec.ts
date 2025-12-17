@@ -40,4 +40,31 @@ test.describe("Blood Pressure Calculator - E2E Tests", () => {
 
     await expect(page.getByText("High Blood Pressure")).toBeVisible();
   });
+
+  // IsEmergency Feature
+  test("Detects emergency blood pressure", async ({ page }) => {
+    await page.goto("/");
+
+    await page.getByLabel("Systolic").fill("185");
+    await page.getByLabel("Diastolic").fill("90");
+
+    await page.getByRole("button", { name: "Submit" }).click();
+
+    await expect(page.locator("#bpEmergency")).toContainText(
+      "Emergency level blood pressure detected"
+    );
+  });
+
+  // non-emergency
+  test("Shows no emergency for normal readings", async ({ page }) => {
+    await page.goto("/");
+
+    await page.getByLabel("Systolic").fill("120");
+    await page.getByLabel("Diastolic").fill("80");
+
+    await page.getByRole("button", { name: "Submit" }).click();
+
+    await expect(page.locator("#bpNoEmergency"))
+        .toContainText("No emergency indicators detected");
+});
 });

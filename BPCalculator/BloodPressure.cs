@@ -29,6 +29,7 @@ namespace BPCalculator
 
         // calculate BP category
         public BPCategory Category
+
         {
             get
             {
@@ -56,5 +57,9 @@ namespace BPCalculator
                 return BPCategory.Low;
             }
         }
+        //  My feature 
+        [Display(Name = "Emergency?")]
+        public bool IsEmergency => Systolic >= 180 || Diastolic >= 120;
+
     }
 }
