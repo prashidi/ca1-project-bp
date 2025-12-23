@@ -38,7 +38,7 @@
 @if (Model.BP != null)
 {
     <hr />
-    <h4>Emergency Status Conditon</h4>
+    <h4>Emergency Status</h4>
 
     @if (Model.BP.IsEmergency)
     {
@@ -48,7 +48,7 @@
     }
     else
     {
-        <p id="bpNoEmergency" class="text-success">
+        <p id="bpEmergency" class="text-success">
             👍 No emergency indicators detected.
         </p>
     }
